@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 /* Parsers tend to choke on entities with values greater than this */
-const u_int32_t MAX_NUM_ENTITY_VAL = 0x10ffff;
+const uint32_t MAX_NUM_ENTITY_VAL = 0x10ffff;
 /* Any numeric entity longer than this is obviously above MAX_NUM_ENTITY_VAL
  * used to avoid dealing with overflows. */
 const size_t MAX_NUM_ENTITY_LEN = 7;
