@@ -6,7 +6,10 @@
 %enum
 %includes
 %{
+#include "html_entities.h"
+
 #include <stdlib.h>
+#include <stdint.h>
 
 /* Parsers tend to choke on entities with values greater than this */
 const uint32_t MAX_NUM_ENTITY_VAL = 0x10ffff;
