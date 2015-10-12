@@ -1,7 +1,7 @@
 build/
 dist/
+node_modules/
 snudown.egg-info/
-src/html_entities.h
 *.pyc
 *.so
 *.so.*
