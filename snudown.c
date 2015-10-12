@@ -1,9 +1,8 @@
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
-
 #include "markdown.h"
 #include "html.h"
 #include "autolink.h"
+
+#include <string.h>
 
 #define SNUDOWN_VERSION "1.4.0"
 
@@ -40,10 +39,6 @@ static struct module_state usertext_toc_state;
 static struct module_state wiki_toc_state;
 static struct module_state usertext_state;
 static struct module_state wiki_state;
-
-/* The module doc strings */
-PyDoc_STRVAR(snudown_module__doc__, "When does the narwhal bacon? At Sundown.");
-PyDoc_STRVAR(snudown_md__doc__, "Render a Markdown document");
 
 static const unsigned int snudown_default_md_flags =
 	MKDEXT_NO_INTRA_EMPHASIS |
@@ -107,49 +102,43 @@ static struct sd_markdown* make_custom_renderer(struct module_state* state,
 	);
 }
 
-void init_default_renderer(PyObject *module) {
-	PyModule_AddIntConstant(module, "RENDERER_USERTEXT", RENDERER_USERTEXT);
+void init_default_renderer(void) {
 	sundown[RENDERER_USERTEXT].main_renderer = make_custom_renderer(&usertext_state, snudown_default_render_flags, snudown_default_md_flags, 0);
 	sundown[RENDERER_USERTEXT].toc_renderer = make_custom_renderer(&usertext_toc_state, snudown_default_render_flags, snudown_default_md_flags, 1);
 	sundown[RENDERER_USERTEXT].state = &usertext_state;
 	sundown[RENDERER_USERTEXT].toc_state = &usertext_toc_state;
 }
 
-void init_wiki_renderer(PyObject *module) {
-	PyModule_AddIntConstant(module, "RENDERER_WIKI", RENDERER_WIKI);
+void init_wiki_renderer(void) {
 	sundown[RENDERER_WIKI].main_renderer = make_custom_renderer(&wiki_state, snudown_wiki_render_flags, snudown_default_md_flags, 0);
 	sundown[RENDERER_WIKI].toc_renderer = make_custom_renderer(&wiki_toc_state, snudown_wiki_render_flags, snudown_default_md_flags, 1);
 	sundown[RENDERER_WIKI].state = &wiki_state;
 	sundown[RENDERER_WIKI].toc_state = &wiki_toc_state;
 }
 
-static PyObject *
-snudown_md(PyObject *self, PyObject *args, PyObject *kwargs)
-{
-	static char *kwlist[] = {"text", "nofollow", "target", "toc_id_prefix", "renderer", "enable_toc", NULL};
+/* Emscripten's enum bindings seem to only work with C++ */
+int default_renderer(void) {
+	return RENDERER_USERTEXT;
+}
 
+int wiki_renderer(void) {
+	return RENDERER_WIKI;
+}
+
+const char*
+snudown_md(char* text, int nofollow/*=0*/, char* target/*=NULL*/, char* toc_id_prefix/*=NULL*/, int renderer/*=RENDERER_USERTEXT*/, int enable_toc/*=0*/) {
 	struct buf ib, *ob;
-	PyObject *py_result;
 	const char* result_text;
-	int renderer = RENDERER_USERTEXT;
-	int enable_toc = 0;
 	struct snudown_renderer _snudown;
-	int nofollow = 0;
-	char* target = NULL;
-	char* toc_id_prefix = NULL;
 	unsigned int flags;
 
 	memset(&ib, 0x0, sizeof(struct buf));
 
-	/* Parse arguments */
-	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s#|izzii", kwlist,
-				&ib.data, &ib.size, &nofollow,
-				&target, &toc_id_prefix, &renderer, &enable_toc)) {
-		return NULL;
-	}
+	/* set up buffer */
+	ib.data = (uint8_t*) text;
+	ib.size = strlen(text);
 
 	if (renderer < 0 || renderer >= RENDERER_COUNT) {
-		PyErr_SetString(PyExc_ValueError, "Invalid renderer");
 		return NULL;
 	}
 
@@ -180,33 +169,23 @@ snudown_md(PyObject *self, PyObject *args, PyObject *kwargs)
 	options->html.toc_id_prefix = NULL;
 	options->html.flags = flags;
 
-	/* make a Python string */
+	/* make a result string */
 	result_text = "";
 	if (ob->data)
 		result_text = (const char*)ob->data;
-	py_result = Py_BuildValue("s#", result_text, (int)ob->size);
 
 	/* Cleanup */
 	bufrelease(ob);
-	return py_result;
+
+	return result_text;
 }
 
-static PyMethodDef snudown_methods[] = {
-	{"markdown", (PyCFunction) snudown_md, METH_VARARGS | METH_KEYWORDS, snudown_md__doc__},
-	{NULL, NULL, 0, NULL} /* Sentinel */
-};
-
-PyMODINIT_FUNC initsnudown(void)
-{
-	PyObject *module;
-
-	module = Py_InitModule3("snudown", snudown_methods, snudown_module__doc__);
-	if (module == NULL)
-		return;
-
-	init_default_renderer(module);
-	init_wiki_renderer(module);
-
-	/* Version */
-	PyModule_AddStringConstant(module, "__version__", SNUDOWN_VERSION);
+const char* version(void) {
+	return SNUDOWN_VERSION;
 }
+
+int main(void) {
+	init_default_renderer();
+	init_wiki_renderer();
+}
+
