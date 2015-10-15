@@ -125,10 +125,11 @@ int wiki_renderer(void) {
 	return RENDERER_WIKI;
 }
 
+/* size param is necessary because text may contain null */
 const char*
-snudown_md(char* text, int nofollow/*=0*/, char* target/*=NULL*/, char* toc_id_prefix/*=NULL*/, int renderer/*=RENDERER_USERTEXT*/, int enable_toc/*=0*/) {
+snudown_md(char* text, size_t size, int nofollow/*=0*/, char* target/*=NULL*/, char* toc_id_prefix/*=NULL*/, int renderer/*=RENDERER_USERTEXT*/, int enable_toc/*=0*/) {
 	struct buf ib, *ob;
-	const char* result_text;
+	char* result_text;
 	struct snudown_renderer _snudown;
 	unsigned int flags;
 
@@ -136,7 +137,7 @@ snudown_md(char* text, int nofollow/*=0*/, char* target/*=NULL*/, char* toc_id_p
 
 	/* set up buffer */
 	ib.data = (uint8_t*) text;
-	ib.size = strlen(text);
+	ib.size = size;
 
 	if (renderer < 0 || renderer >= RENDERER_COUNT) {
 		return NULL;
@@ -169,10 +170,11 @@ snudown_md(char* text, int nofollow/*=0*/, char* target/*=NULL*/, char* toc_id_p
 	options->html.toc_id_prefix = NULL;
 	options->html.flags = flags;
 
-	/* make a result string */
-	result_text = "";
+	/* make a null-terminated result string - the buffer isn't */
+	result_text = (char*) malloc(ob->size + 1);
+	result_text[ob->size] = 0;
 	if (ob->data)
-		result_text = (const char*)ob->data;
+		strncpy(result_text, (char*) ob->data, ob->size);
 
 	/* Cleanup */
 	bufrelease(ob);

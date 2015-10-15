@@ -23,27 +23,34 @@ const RENDERER_USERTEXT = Module.ccall('default_renderer', 'number');
  */
 const RENDERER_WIKI = Module.ccall('wiki_renderer', 'number');
 
-const _markdown = Module.cwrap('snudown_md', 'string', ['string', 'number', 'string', 'string', 'number', 'number']);
+const __markdown = Module.cwrap('snudown_md', 'string', ['number', 'number', 'number', 'string', 'string', 'number', 'number']);
+
+function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) {
+	// not using Emscripten's automatic string handling since 'text'.length is unreliable for UTF-8 (e.g. e accent)
+	const size = Module.lengthBytesUTF8(text); // excludes null terminator
+	const buf = Module.allocate(Module.intArrayFromString(text), 'i8', Module.ALLOC_STACK);
+	return __markdown(buf, size, nofollow, target, toc_id_prefix, renderer, enable_toc);
+}
 
 /**
  * Render markdown <tt>text</tt> to an HTML string.
- * Arguments may be passed positionally: <tt>markdown('hi', true, '_top', RENDERER_WIKI, '', true)</tt>
+ * Arguments may be passed positionally: <tt>markdown('hi', true, '_top', '', RENDERER_WIKI, true)</tt>
  * or by name in a single object: <tt>markdown({ text: 'hi', renderer: RENDERER_WIKI })</tt>
  * Equivalent to python: <tt>markdown</tt>.
  * @param {string} text
  * @param {boolean} [nofollow=false] Whether to add <tt>rel="nofollow"</tt> to all links.
  * @param {string} [target=null] The <tt>target</tt> property of all links.
+ * @param {string} [toc_id_prefix=null] Added to the <tt>id</tt> of each TOC link, i.e. <tt>#PREFIXtoc_0</tt>.
  * @param {number} [renderer=RENDERER_USERTEXT]
- * @param {string} [toc_id_prefix=null] Added to the <tt>id</tt> of each TOC link, i.e. <tt>#PREFIXtoc_0</tt>
  * @param {boolean} [enable_toc=false] Whether to create a table of contents (Reddit generates the TOC separately).
  * @returns {string} The rendered HTML.
  */
-function markdown({ text = arguments[0], nofollow = arguments[1], target = arguments[2], renderer = arguments[3] === undefined ? RENDERER_USERTEXT : arguments[3], toc_id_prefix = arguments[4], enable_toc = arguments[5] } = {}) {
+function markdown({ text = arguments[0], nofollow = arguments[1], target = arguments[2], toc_id_prefix = arguments[3], renderer = arguments[4] === undefined ? RENDERER_USERTEXT : arguments[4], enable_toc = arguments[5] } = {}) {
 	return _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc);
 }
 
 /**
- * Equivalent to {@link markdown} with <tt>renderer=RENDERER_WIKI</tt>.
+ * Equivalent to {@link markdown} with the <tt>renderer</tt> param omitted, and always set to {@link RENDERER_WIKI}.
  * @param {string} text
  * @param {boolean} [nofollow=false]
  * @param {string} [target=null]
