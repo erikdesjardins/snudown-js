@@ -19,7 +19,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
- 
+
 (function(exports) {
 var noop = function() {};
 // Silence logging (can't be otherwise disabled)
@@ -27,4 +27,7 @@ var Module = {
 	print: noop,
 	printErr: noop
 };
+// Trick it into thinking we're in the browser so it doesn't override our exports
+// Safe because it doesn't use browser APIs anyways (-s NO_BROWSER=1)
+var window = {};
 

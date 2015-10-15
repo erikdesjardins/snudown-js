@@ -1,13 +1,11 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+var Snudown = require('./dist/snudown.js');
 
-import snudown
-import unittest
-import itertools
-import cStringIO as StringIO
+// http://ecmanaut.blogspot.ca/2006/07/encoding-decoding-utf8-in-javascript.html
+function encodeUTF8(s) {
+    return unescape(encodeURIComponent(s));
+}
 
-
-cases = {
+var cases = {
     '': '',
     'http://www.reddit.com':
         '<p><a href="http://www.reddit.com">http://www.reddit.com</a></p>\n',
@@ -18,7 +16,7 @@ cases = {
     'foo@example.com':
         '<p><a href="mailto:foo@example.com">foo@example.com</a></p>\n',
 
-    '[foo](http://en.wikipedia.org/wiki/Link_(film\))':
+    '[foo](http://en.wikipedia.org/wiki/Link_(film\\))':
         '<p><a href="http://en.wikipedia.org/wiki/Link_(film)">foo</a></p>\n',
 
     '(http://tsfr.org)':
@@ -51,7 +49,7 @@ cases = {
     '/r/':
         '<p>/r/</p>\n',
 
-    r'escaped \/r/test':
+    'escaped \\/r/test':
         '<p>escaped /r/test</p>\n',
 
     'ampersands http://www.google.com?test&blah':
@@ -63,16 +61,16 @@ cases = {
     ' www.a.co?with&test':
         '<p><a href="http://www.a.co?with&amp;test">www.a.co?with&amp;test</a></p>\n',
 
-    r'Normal^superscript':
+    'Normal^superscript':
         '<p>Normal<sup>superscript</sup></p>\n',
 
-    r'Escape\^superscript':
+    'Escape\\^superscript':
         '<p>Escape^superscript</p>\n',
 
-    r'~~normal strikethrough~~':
+    '~~normal strikethrough~~':
         '<p><del>normal strikethrough</del></p>\n',
 
-    r'\~~escaped strikethrough~~':
+    '\\~~escaped strikethrough~~':
         '<p>~~escaped strikethrough~~</p>\n',
 
     'anywhere\x03, you':
@@ -153,9 +151,9 @@ cases = {
     'fuu/reddit':
         '<p>fuu/reddit</p>\n',
 
-    # Don't treat unicode punctuation as a word boundary for now
-    u'a。u/reddit'.encode('utf8'):
-        u'<p>a。u/reddit</p>\n'.encode('utf8'),
+    /*# Don't treat unicode punctuation as a word boundary for now
+    [encodeUTF8('a。u/reddit')]:
+        encodeUTF8('<p>a。u/reddit</p>\n'),*/
 
     '\\/u/me':
         '<p>/u/me</p>\n',
@@ -241,8 +239,8 @@ cases = {
     'foobar/reddit.com':
         '<p>foobar/reddit.com</p>\n',
 
-    u'a。r/reddit.com'.encode('utf8'):
-        u'<p>a。r/reddit.com</p>\n'.encode('utf8'),
+    /*[encodeUTF8('a。r/reddit.com')]:
+        encodeUTF8('<p>a。r/reddit.com</p>\n'),*/
 
     '/R/reddit.com':
         '<p>/R/reddit.com</p>\n',
@@ -274,17 +272,17 @@ cases = {
     'www.http://example.com/':
         '<p><a href="http://www.http://example.com/">www.http://example.com/</a></p>\n',
 
-    ('|' * 5) + '\n' + ('-|' * 5) + '\n|\n':
-        '<table><thead>\n<tr>\n' + ('<th></th>\n' * 4) + '</tr>\n</thead><tbody>\n<tr>\n<td colspan="4" ></td>\n</tr>\n</tbody></table>\n',
+    /*['|'.repeat(5) + '\n' + '-|'.repeat(5) + '\n|\n']:
+        '<table><thead>\n<tr>\n' + '<th></th>\n'.repeat(4) + '</tr>\n</thead><tbody>\n<tr>\n<td colspan="4" ></td>\n</tr>\n</tbody></table>\n',
 
-    ('|' * 2) + '\n' + ('-|' * 2) + '\n|\n':
-        '<table><thead>\n<tr>\n' + ('<th></th>\n' * 1) + '</tr>\n</thead><tbody>\n<tr>\n<td></td>\n</tr>\n</tbody></table>\n',
+    ['|'.repeat(2) + '\n' + '-|'.repeat(2) + '\n|\n']:
+        '<table><thead>\n<tr>\n' + '<th></th>\n'.repeat(1) + '</tr>\n</thead><tbody>\n<tr>\n<td></td>\n</tr>\n</tbody></table>\n',
 
-    ('|' * 65) + '\n' + ('-|' * 65) + '\n|\n':
-        '<table><thead>\n<tr>\n' + ('<th></th>\n' * 64) + '</tr>\n</thead><tbody>\n<tr>\n<td colspan="64" ></td>\n</tr>\n</tbody></table>\n',
+    ['|'.repeat(65) + '\n' + '-|'.repeat(65) + '\n|\n']:
+        '<table><thead>\n<tr>\n' + '<th></th>\n'.repeat(64) + '</tr>\n</thead><tbody>\n<tr>\n<td colspan="64" ></td>\n</tr>\n</tbody></table>\n',
 
-    ('|' * 66) + '\n' + ('-|' * 66) + '\n|\n':
-        '<p>' + ('|' * 66) + '\n' + ('-|' * 66) + '\n|' + '</p>\n',
+    ['|'.repeat(66) + '\n' + '-|'.repeat(66) + '\n|\n']:
+        '<p>' + '|'.repeat(66) + '\n' + '-|'.repeat(66) + '\n|' + '</p>\n',*/
 
     '&thetasym;':
         '<p>&thetasym;</p>\n',
@@ -333,31 +331,67 @@ cases = {
 
     '&#x;':
         '<p>&amp;#x;</p>\n',
+};
+
+// Older node versions don't support computed property names
+
+function repeat(str, n) {
+    return new Array(n + 1).join(str);
 }
 
-# Test that every numeric entity is encoded as
-# it should be.
-ILLEGAL_NUMERIC_ENTS = frozenset(itertools.chain(
+cases[encodeUTF8('a。u/reddit')] = encodeUTF8('<p>a。u/reddit</p>\n');
+
+cases[encodeUTF8('a。r/reddit.com')] = encodeUTF8('<p>a。r/reddit.com</p>\n');
+
+cases[repeat('|', 5) + '\n' + repeat('-|', 5) + '\n|\n'] = '<table><thead>\n<tr>\n' + repeat('<th></th>\n', 4) + '</tr>\n</thead><tbody>\n<tr>\n<td colspan="4" ></td>\n</tr>\n</tbody></table>\n';
+cases[repeat('|', 2) + '\n' + repeat('-|', 2) + '\n|\n'] = '<table><thead>\n<tr>\n' + repeat('<th></th>\n', 1) + '</tr>\n</thead><tbody>\n<tr>\n<td></td>\n</tr>\n</tbody></table>\n';
+cases[repeat('|', 65) + '\n' + repeat('-|', 65) + '\n|\n'] = '<table><thead>\n<tr>\n' + repeat('<th></th>\n', 64) + '</tr>\n</thead><tbody>\n<tr>\n<td colspan="64" ></td>\n</tr>\n</tbody></table>\n';
+cases[repeat('|', 66) + '\n' + repeat('-|', 66) + '\n|\n'] = '<p>' + repeat('|', 66) + '\n' + repeat('-|', 66) + '\n|' + '</p>\n';
+
+function xrange(start, end) {
+    if (end == undefined) {
+        end = start;
+        start = 0;
+    }
+    var out = [];
+    for (var i = start; i < end; i++) {
+        out.push(i);
+    }
+    return out;
+}
+
+function chain() {
+    return Array.prototype.reduce.call(arguments, function(acc, arr) { return acc.concat(arr); });
+}
+
+// Test that every numeric entity is encoded as
+// it should be.
+var ILLEGAL_NUMERIC_ENTS = chain(
     xrange(0, 9),
     xrange(11, 13),
     xrange(14, 32),
     xrange(55296, 57344),
-    xrange(65534, 65536),
-))
+    xrange(65534, 65536)
+);
 
-ent_test_key = ''
-ent_test_val = ''
-for i in xrange(65550):
-    ent_testcase = '&#%d;&#x%x;' % (i, i)
-    ent_test_key += ent_testcase
-    if i in ILLEGAL_NUMERIC_ENTS:
-        ent_test_val += ent_testcase.replace('&', '&amp;')
-    else:
-        ent_test_val += ent_testcase
+function _in(arr, ele) {
+    return arr.some(function(v) { return v === ele; })
+}
 
-cases[ent_test_key] = '<p>%s</p>\n' % ent_test_val
+var ent_test_key = '';
+var ent_test_val = '';
+xrange(65550).forEach(function(i) {
+    ent_testcase = '&#' + i + ';&#x' + i.toString(16) + ';';
+    ent_test_key += ent_testcase;
+    if (_in(ILLEGAL_NUMERIC_ENTS, i))
+        ent_test_val += ent_testcase.replace(/&/g, '&amp;');
+    else
+        ent_test_val += ent_testcase;
+});
 
-wiki_cases = {
+cases[ent_test_key] = '<p>' + ent_test_val + '</p>\n';
+
+var wiki_cases = {
     '<table scope="foo"bar>':
         '<p><table scope="foo"></p>\n',
 
@@ -420,42 +454,26 @@ wiki_cases = {
 
     ' <table colspan=\'\'\' a="" \' scope="foo">':
         '<p><table scope="foo"></p>\n',
+};
+
+function runTest(renderer, input, expected_output) {
+    var output = Snudown.markdown({ text: input, renderer: renderer });
+    if (output !== expected_output)
+        throw new Error(
+            "TEST FAILED:" +
+            "\n       input: " + input +
+            "\n    expected: " + expected_output +
+            "\n      actual: " + output
+        );
 }
 
-class SnudownTestCase(unittest.TestCase):
-    def __init__(self, renderer=snudown.RENDERER_USERTEXT):
-        self.renderer = renderer
-        unittest.TestCase.__init__(self)
+for (var input in wiki_cases) {
+    runTest(Snudown.RENDERER_WIKI, input, wiki_cases[input]);
+}
 
-    def runTest(self):
-        output = snudown.markdown(self.input, renderer=self.renderer)
+for (var input in cases) {
+    runTest(Snudown.RENDERER_USERTEXT, input, cases[input]);
+}
 
-        for i, (a, b) in enumerate(zip(repr(self.expected_output),
-                                       repr(output))):
-            if a != b:
-                io = StringIO.StringIO()
-                print >> io, "TEST FAILED:"
-                print >> io, "       input: %s" % repr(self.input)
-                print >> io, "    expected: %s" % repr(self.expected_output)
-                print >> io, "      actual: %s" % repr(output)
-                print >> io, "              %s" % (' ' * i + '^')
-                self.fail(io.getvalue())
+console.log('Test Passed.');
 
-
-
-def test_snudown():
-    suite = unittest.TestSuite()
-
-    for input, expected_output in wiki_cases.iteritems():
-        case = SnudownTestCase(renderer=snudown.RENDERER_WIKI)
-        case.input = input
-        case.expected_output = expected_output
-        suite.addTest(case)
-
-    for input, expected_output in cases.iteritems():
-        case = SnudownTestCase()
-        case.input = input
-        case.expected_output = expected_output
-        suite.addTest(case)
-
-    return suite
