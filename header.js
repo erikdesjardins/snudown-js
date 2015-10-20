@@ -21,7 +21,7 @@
  */
 
 (function(exports) {
-var noop = function() {};
+function noop() {}
 // Silence logging (can't be otherwise disabled)
 var Module = {
 	print: noop,
