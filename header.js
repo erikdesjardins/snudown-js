@@ -1,5 +1,3 @@
-"use strict";
-
 /* snudown-js - a 'native' port of Snudown to JavaScript */
 
 /*
@@ -20,7 +18,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-(function(exports) {
+(function(exports) {'use strict';
 function noop() {}
 // Silence logging (can't be otherwise disabled)
 var Module = {
