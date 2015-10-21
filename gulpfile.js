@@ -3,6 +3,7 @@
 	var gulp = require('gulp');
 	var babel = require('gulp-babel');
 	var replace = require('gulp-replace');
+	var uglify = require('gulp-uglify');
 	var concat = require('gulp-concat');
 	var plumber = require('gulp-plumber');
 	var eslint = require('gulp-eslint');
@@ -10,6 +11,7 @@
 	gulp.task('build', ['norequire', 'babel'], function() {
 		return gulp.src(['header.js', 'build/snudowncore.js', 'build/snudown.js', 'footer.js'])
 			.pipe(concat('snudown.js'))
+			.pipe(uglify({ preserveComments: 'license' }))
 			.pipe(gulp.dest('dist'));
 	});
 
