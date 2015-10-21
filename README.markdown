@@ -1,20 +1,57 @@
-﻿Snudown
+snudown-js
 =======
 
-`Snudown` is a reddit-specific fork of the [Sundown](http://github.com/vmg/sundown)
-Markdown parser used by GitHub, with Python integration added.
+`snudown-js` is a 'native' (compiled with [Emscripten](https://kripken.github.io/emscripten-site/)) port of [Snudown](https://github.com/reddit/snudown/), the Markdown parser used by Reddit.
 
 
-Install
+Usage
+-----
+
+Include the [source](https://github.com/erikdesjardins/snudown-js/releases) directly or import from npm: `require('snudown-js')`.
+
+The API is as close as possible to the Python API provided by Snudown.
+
+Basic usage:
+
+`Snudown.markdown('some text'); // "<p>some text</p>\n"`
+
+`Snudown.markdownWiki('<table scope="foo">'); // "<p><table scope="foo"></p>\n"`
+
+For more in-depth documentation, see the comments in `snudown.js`.
+
+
+Building
+--------
+
+### You will need...
+
+- to be able to run bash scripts
+- `gperf`, [a command-line utility](https://www.gnu.org/software/gperf/) - through your package manager
+- `npm`, [node package manager](https://www.npmjs.com/) - through your package manager
+- `emcc`, the Emscripten compiler - [from the Emscripten SDK](https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html)
+
+### Setup
+
+Run	`npm i`.
+
+Ensure that `gperf` and `emcc` can be invoked from the terminal.
+
+### Build
+
+Run `./build.sh`.
+
+Output is to `dist/`.
+
+
+Testing
 -------
 
-Run `setup.py install` to install the module.
+### You will need...
 
+- `node`, the node.js runtime - probably installed during the build process
+- a successful build of `snudown-js`
 
-Thanks
-------
-
-Many thanks to @vmg for implementing the initial version of this fork!
+After building, run `node test_snudown.js`.
 
 
 License
