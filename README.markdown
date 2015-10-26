@@ -1,6 +1,8 @@
 snudown-js
 =======
 
+[![Build Status](https://travis-ci.org/erikdesjardins/snudown-js.svg)](https://travis-ci.org/erikdesjardins/snudown-js)
+
 `snudown-js` is a 'native' (compiled with [Emscripten](https://kripken.github.io/emscripten-site/)) port of [Snudown](https://github.com/reddit/snudown/), the Markdown parser used by Reddit.
 
 
@@ -18,7 +20,6 @@ Basic usage:
 `Snudown.markdownWiki('<table scope="foo">'); // "<p><table scope="foo"></p>\n"`
 
 For more in-depth documentation, see the comments in `snudown.js`.
-
 
 Building
 --------
