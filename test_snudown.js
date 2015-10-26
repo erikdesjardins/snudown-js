@@ -456,24 +456,46 @@ var wiki_cases = {
         '<p><table scope="foo"></p>\n',
 };
 
-function runTest(renderer, input, expected_output) {
-    var output = Snudown.markdown({ text: input, renderer: renderer });
+function runTest(input, expected_output) {
+    var output = Snudown.markdown.apply(null, input);
     if (output !== expected_output)
         throw new Error(
             "TEST FAILED:" +
-            "\n       input: " + input +
+            "\n       input: " + (input[0].text || input[0]) +
             "\n    expected: " + expected_output +
             "\n      actual: " + output
         );
 }
 
 for (var input in wiki_cases) {
-    runTest(Snudown.RENDERER_WIKI, input, wiki_cases[input]);
+    runTest([{ text: input, renderer: Snudown.RENDERER_WIKI }], wiki_cases[input]);
 }
 
 for (var input in cases) {
-    runTest(Snudown.RENDERER_USERTEXT, input, cases[input]);
+    runTest([input], cases[input]);
 }
+
+[[
+    ['/u/test', true, '_top'],
+    '<p><a href="/u/test" rel="nofollow" target="_top">/u/test</a></p>\n'
+], [
+    [{ text: '/u/test', nofollow: true, target: '_top' }],
+    '<p><a href="/u/test" rel="nofollow" target="_top">/u/test</a></p>\n'
+], [
+    ['<table scope="foo">', null, null, Snudown.RENDERER_WIKI],
+    '<p><table scope="foo"></p>\n'
+], [
+    ['<table scope="foo">', null, null, Snudown.RENDERER_USERTEXT],
+    '<p>&lt;table scope=&quot;foo&quot;&gt;</p>\n'
+], [
+    ['###Test', null, null, null, true, 'prefixed_'],
+    '<div class="toc">\n<ul>\n<li>\n<a href="#prefixed_toc_0">Test</a>\n</li>\n</ul>\n</div>\n\n<h3 id="prefixed_toc_0">Test</h3>\n'
+], [
+    [{ text: '###Test', enableToc: true, tocIdPrefix: 'prefixed_' }],
+    '<div class="toc">\n<ul>\n<li>\n<a href="#prefixed_toc_0">Test</a>\n</li>\n</ul>\n</div>\n\n<h3 id="prefixed_toc_0">Test</h3>\n'
+]].forEach(function(testArgs) {
+    runTest.apply(null, testArgs);
+});
 
 console.log('Test Passed.');
 
