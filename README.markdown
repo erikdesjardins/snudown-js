@@ -9,7 +9,7 @@ snudown-js
 Usage
 -----
 
-Include the [source](https://github.com/erikdesjardins/snudown-js/releases) directly or import from npm: `require('snudown-js')`.
+Include the [source](https://github.com/erikdesjardins/snudown-js/releases/latest) directly or import from npm: `require('snudown-js')`.
 
 The API is as close as possible to the Python API provided by Snudown.
 
