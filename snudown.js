@@ -34,8 +34,8 @@ function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) 
 
 /**
  * Render markdown <tt>text</tt> to an HTML string.
- * Arguments may be passed positionally: <tt>markdown('hi', true, '_top', '', RENDERER_WIKI, true)</tt>,
- * or by name in a single object: <tt>markdown({ text: 'hi', renderer: RENDERER_WIKI })</tt>.
+ * Arguments may be passed positionally: <tt>markdown('#/u/hi', true, '_top', RENDERER_WIKI, true, 'prefix_')</tt>,
+ * or by name in a single object: <tt>markdown({ text: '#/u/hi', nofollow: true, target: '_top', renderer: RENDERER_WIKI, enableToc: true, tocIdPrefix: 'prefix_' })</tt>.
  * Equivalent to python: <tt>markdown</tt>.
  * @param {string} text
  * @param {boolean} [nofollow=false] Whether to add <tt>rel="nofollow"</tt> to all links.
