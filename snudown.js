@@ -40,12 +40,12 @@ function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) 
  * @param {string} text
  * @param {boolean} [nofollow=false] Whether to add <tt>rel="nofollow"</tt> to all links.
  * @param {string} [target=null] The <tt>target</tt> property of all links.
- * @param {string} [tocIdPrefix=null] Added to the <tt>id</tt> of each TOC link, i.e. <tt>#PREFIXtoc_0</tt>.
  * @param {number} [renderer=RENDERER_USERTEXT]
  * @param {boolean} [enableToc=false] Whether to create a table of contents (Reddit generates the TOC separately).
+ * @param {string} [tocIdPrefix=null] Added to the <tt>id</tt> of each TOC link, i.e. <tt>#PREFIXtoc_0</tt>.
  * @returns {string} The rendered HTML.
  */
-function markdown({ text = arguments[0], nofollow = arguments[1], target = arguments[2], tocIdPrefix = arguments[3], renderer = arguments[4] === undefined ? RENDERER_USERTEXT : arguments[4], enableToc = arguments[5] } = {}) {
+function markdown({ text = arguments[0], nofollow = arguments[1], target = arguments[2], renderer = arguments[3] === undefined ? RENDERER_USERTEXT : arguments[3], enableToc = arguments[4], tocIdPrefix = arguments[5] } = {}) {
 	return _markdown(text, nofollow, target, tocIdPrefix, renderer, enableToc);
 }
 
@@ -54,11 +54,11 @@ function markdown({ text = arguments[0], nofollow = arguments[1], target = argum
  * @param {string} text
  * @param {boolean} [nofollow=false]
  * @param {string} [target=null]
- * @param {string} [tocIdPrefix=null]
  * @param {boolean} [enableToc=false]
+ * @param {string} [tocIdPrefix=null]
  * @returns {string} The rendered HTML.
  */
-function markdownWiki({ text = arguments[0], nofollow = arguments[1], target = arguments[2], tocIdPrefix = arguments[3], enableToc = arguments[4] } = {}) {
+function markdownWiki({ text = arguments[0], nofollow = arguments[1], target = arguments[2], enableToc = arguments[3], tocIdPrefix = arguments[4] } = {}) {
 	return _markdown(text, nofollow, target, tocIdPrefix, RENDERER_WIKI, enableToc);
 }
 
