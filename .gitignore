@@ -6,5 +6,4 @@ snudown.egg-info/
 *.so
 *.so.*
 *.o
-/fuzzing/bin
-/fuzzing/testing
+
