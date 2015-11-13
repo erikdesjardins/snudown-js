@@ -174,7 +174,7 @@ snudown_md(char* text, size_t size, int nofollow/*=0*/, char* target/*=NULL*/, c
 	result_text = (char*) malloc(ob->size + 1);
 	result_text[ob->size] = 0;
 	if (ob->data)
-		strncpy(result_text, (char*) ob->data, ob->size);
+		memcpy(result_text, (char*) ob->data, ob->size);
 
 	/* Cleanup */
 	bufrelease(ob);
