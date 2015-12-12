@@ -23,13 +23,17 @@ const RENDERER_USERTEXT = Module.ccall('default_renderer', 'number');
  */
 const RENDERER_WIKI = Module.ccall('wiki_renderer', 'number');
 
-const __markdown = Module.cwrap('snudown_md', 'string', ['number', 'number', 'number', 'string', 'string', 'number', 'number']);
+const __markdown = Module.cwrap('snudown_md', 'number', ['number', 'number', 'number', 'string', 'string', 'number', 'number']);
 
 function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) {
 	// not using Emscripten's automatic string handling since 'text'.length is unreliable for UTF-8
 	const size = Module.lengthBytesUTF8(text); // excludes null terminator
-	const buf = Module.allocate(Module.intArrayFromString(text), 'i8', Module.ALLOC_STACK);
-	return __markdown(buf, size, nofollow, target, toc_id_prefix, renderer, enable_toc);
+	const buf = Module.allocate(Module.intArrayFromString(text), 'i8', Module.ALLOC_NORMAL);
+	const str = __markdown(buf, size, nofollow, target, toc_id_prefix, renderer, enable_toc);
+	Module._free(buf);
+	const string = Module.Pointer_stringify(str); // eslint-disable-line babel/new-cap
+	Module._free(str);
+	return string;
 }
 
 /**
