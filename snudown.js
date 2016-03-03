@@ -23,19 +23,6 @@ const RENDERER_USERTEXT = Module.ccall('default_renderer', 'number');
  */
 const RENDERER_WIKI = Module.ccall('wiki_renderer', 'number');
 
-const __markdown = Module.cwrap('snudown_md', 'number', ['number', 'number', 'number', 'string', 'string', 'number', 'number']);
-
-function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) {
-	// not using Emscripten's automatic string handling since 'text'.length is unreliable for UTF-8
-	const size = Module.lengthBytesUTF8(text); // excludes null terminator
-	const buf = Module.allocate(Module.intArrayFromString(text), 'i8', Module.ALLOC_NORMAL);
-	const str = __markdown(buf, size, nofollow, target, toc_id_prefix, renderer, enable_toc);
-	Module._free(buf);
-	const string = Module.Pointer_stringify(str); // eslint-disable-line babel/new-cap
-	Module._free(str);
-	return string;
-}
-
 /**
  * Render markdown <tt>text</tt> to an HTML string.
  * Arguments may be passed positionally: <tt>markdown('#/u/hi', true, '_top', RENDERER_WIKI, true, 'prefix_')</tt>,
@@ -64,6 +51,25 @@ function markdown({ text = arguments[0], nofollow = arguments[1], target = argum
  */
 function markdownWiki({ text = arguments[0], nofollow = arguments[1], target = arguments[2], enableToc = arguments[3], tocIdPrefix = arguments[4] } = {}) {
 	return _markdown(text, nofollow, target, tocIdPrefix, RENDERER_WIKI, enableToc);
+}
+
+/**
+ * @private
+ */
+const __markdown = Module.cwrap('snudown_md', 'number', ['number', 'number', 'number', 'string', 'string', 'number', 'number']);
+
+/**
+ * @private
+ */
+function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) {
+	// not using Emscripten's automatic string handling since 'text'.length is unreliable for UTF-8
+	const size = Module.lengthBytesUTF8(text); // excludes null terminator
+	const buf = Module.allocate(Module.intArrayFromString(text), 'i8', Module.ALLOC_NORMAL);
+	const str = __markdown(buf, size, nofollow, target, toc_id_prefix, renderer, enable_toc);
+	Module._free(buf);
+	const string = Module.Pointer_stringify(str); // eslint-disable-line babel/new-cap
+	Module._free(str);
+	return string;
 }
 
 exports.version = version;
