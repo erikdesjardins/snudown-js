@@ -70,11 +70,19 @@ function markdownWiki(text, nofollow, target, enableToc, tocIdPrefix) {
 
 /**
  * @private
+ * @returns {number} A pointer to the rendered string.
  */
 const __markdown = Module.cwrap('snudown_md', 'number', ['number', 'number', 'number', 'string', 'string', 'number', 'number']);
 
 /**
  * @private
+ * @param {string} text
+ * @param {boolean} nofollow
+ * @param {string} target
+ * @param {string} toc_id_prefix
+ * @param {number} renderer
+ * @param {boolean} enable_toc
+ * @returns {string} The rendered string.
  */
 function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) {
 	// not using Emscripten's automatic string handling since 'text'.length is unreliable for UTF-8
