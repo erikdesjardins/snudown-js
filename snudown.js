@@ -2,7 +2,7 @@
 
 /**
  * Snudown's version number, usually similar to: "3.2.1".
- * Equivalent to python: <tt>__version__</tt>.
+ * Equivalent to python: `__version__`.
  * @type {string}
  */
 const version = Module.ccall('version', 'string');
@@ -10,7 +10,7 @@ const version = Module.ccall('version', 'string');
 /**
  * The index of the usertext renderer.
  * Can be passed to {@link markdown}.
- * Equivalent to python: <tt>RENDERER_USERTEXT<tt>.
+ * Equivalent to python: `RENDERER_USERTEXT`.
  * @type {number}
  */
 const RENDERER_USERTEXT = Module.ccall('default_renderer', 'number');
@@ -18,22 +18,22 @@ const RENDERER_USERTEXT = Module.ccall('default_renderer', 'number');
 /**
  * The index of the wiki renderer.
  * Can be passed to {@link markdown}.
- * Equivalent to python: <tt>RENDERER_WIKI<tt>.
+ * Equivalent to python: `RENDERER_WIKI`.
  * @type {number}
  */
 const RENDERER_WIKI = Module.ccall('wiki_renderer', 'number');
 
 /**
- * Render markdown <tt>text</tt> to an HTML string.
- * Arguments may be passed positionally: <tt>markdown('#/u/hi', true, '_top', RENDERER_WIKI, true, 'prefix_')</tt>,
- * or by name in a single object: <tt>markdown({ text: '#/u/hi', nofollow: true, target: '_top', renderer: RENDERER_WIKI, enableToc: true, tocIdPrefix: 'prefix_' })</tt>.
- * Equivalent to python: <tt>markdown</tt>.
+ * Render markdown `text` to an HTML string.
+ * Arguments may be passed positionally: `markdown('#/u/hi', true, '_top', RENDERER_WIKI, true, 'prefix_')`,
+ * or by name in a single object: `markdown({ text: '#/u/hi', nofollow: true, target: '_top', renderer: RENDERER_WIKI, enableToc: true, tocIdPrefix: 'prefix_' })`.
+ * Equivalent to python: `markdown`.
  * @param {string} text
- * @param {boolean} [nofollow=false] Whether to add <tt>rel="nofollow"</tt> to all links.
- * @param {string} [target=null] The <tt>target</tt> property of all links.
+ * @param {boolean} [nofollow=false] Whether to add `rel="nofollow"` to all links.
+ * @param {string} [target=null] The `target` property of all links.
  * @param {number} [renderer=RENDERER_USERTEXT]
  * @param {boolean} [enableToc=false] Whether to create a table of contents (Reddit generates the TOC separately).
- * @param {string} [tocIdPrefix=null] Added to the <tt>id</tt> of each TOC link, i.e. <tt>#PREFIXtoc_0</tt>.
+ * @param {string} [tocIdPrefix=null] Added to the `id` of each TOC link, i.e. `#PREFIXtoc_0`.
  * @returns {string} The rendered HTML.
  */
 function markdown(text, nofollow, target, renderer, enableToc, tocIdPrefix) {
