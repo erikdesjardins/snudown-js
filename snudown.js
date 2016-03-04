@@ -23,19 +23,6 @@ const RENDERER_USERTEXT = Module.ccall('default_renderer', 'number');
  */
 const RENDERER_WIKI = Module.ccall('wiki_renderer', 'number');
 
-const __markdown = Module.cwrap('snudown_md', 'number', ['number', 'number', 'number', 'string', 'string', 'number', 'number']);
-
-function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) {
-	// not using Emscripten's automatic string handling since 'text'.length is unreliable for UTF-8
-	const size = Module.lengthBytesUTF8(text); // excludes null terminator
-	const buf = Module.allocate(Module.intArrayFromString(text), 'i8', Module.ALLOC_NORMAL);
-	const str = __markdown(buf, size, nofollow, target, toc_id_prefix, renderer, enable_toc);
-	Module._free(buf);
-	const string = Module.Pointer_stringify(str); // eslint-disable-line babel/new-cap
-	Module._free(str);
-	return string;
-}
-
 /**
  * Render markdown <tt>text</tt> to an HTML string.
  * Arguments may be passed positionally: <tt>markdown('#/u/hi', true, '_top', RENDERER_WIKI, true, 'prefix_')</tt>,
@@ -49,7 +36,16 @@ function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) 
  * @param {string} [tocIdPrefix=null] Added to the <tt>id</tt> of each TOC link, i.e. <tt>#PREFIXtoc_0</tt>.
  * @returns {string} The rendered HTML.
  */
-function markdown({ text = arguments[0], nofollow = arguments[1], target = arguments[2], renderer = arguments[3] === undefined ? RENDERER_USERTEXT : arguments[3], enableToc = arguments[4], tocIdPrefix = arguments[5] } = {}) {
+function markdown(text, nofollow, target, renderer, enableToc, tocIdPrefix) {
+	if (typeof text === 'object') {
+		({ text, nofollow, target, renderer, enableToc, tocIdPrefix } = text || {});
+	}
+	if (typeof text !== 'string') {
+		text = '';
+	}
+	if (typeof renderer !== 'number') {
+		renderer = RENDERER_USERTEXT;
+	}
 	return _markdown(text, nofollow, target, tocIdPrefix, renderer, enableToc);
 }
 
@@ -62,8 +58,41 @@ function markdown({ text = arguments[0], nofollow = arguments[1], target = argum
  * @param {string} [tocIdPrefix=null]
  * @returns {string} The rendered HTML.
  */
-function markdownWiki({ text = arguments[0], nofollow = arguments[1], target = arguments[2], enableToc = arguments[3], tocIdPrefix = arguments[4] } = {}) {
+function markdownWiki(text, nofollow, target, enableToc, tocIdPrefix) {
+	if (typeof text === 'object') {
+		({ text, nofollow, target, enableToc, tocIdPrefix } = text || {});
+	}
+	if (typeof text !== 'string') {
+		text = '';
+	}
 	return _markdown(text, nofollow, target, tocIdPrefix, RENDERER_WIKI, enableToc);
+}
+
+/**
+ * @private
+ * @returns {number} A pointer to the rendered string.
+ */
+const __markdown = Module.cwrap('snudown_md', 'number', ['number', 'number', 'number', 'string', 'string', 'number', 'number']);
+
+/**
+ * @private
+ * @param {string} text
+ * @param {boolean} nofollow
+ * @param {string} target
+ * @param {string} toc_id_prefix
+ * @param {number} renderer
+ * @param {boolean} enable_toc
+ * @returns {string} The rendered string.
+ */
+function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) {
+	// not using Emscripten's automatic string handling since 'text'.length is unreliable for UTF-8
+	const size = Module.lengthBytesUTF8(text); // excludes null terminator
+	const buf = Module.allocate(Module.intArrayFromString(text), 'i8', Module.ALLOC_NORMAL);
+	const str = __markdown(buf, size, nofollow, target, toc_id_prefix, renderer, enable_toc);
+	Module._free(buf);
+	const string = Module.Pointer_stringify(str); // eslint-disable-line babel/new-cap
+	Module._free(str);
+	return string;
 }
 
 exports.version = version;
