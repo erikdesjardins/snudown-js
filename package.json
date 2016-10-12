@@ -8,12 +8,9 @@
     "url": "https://github.com/erikdesjardins/snudown-js.git"
   },
   "devDependencies": {
-    "babel-eslint": "^4.0.8",
-    "eslint-plugin-babel": "^2.1.1",
     "gulp": "^3.9.0",
     "gulp-babel": "^5.2.1",
     "gulp-concat": "^2.6.0",
-    "gulp-eslint": "^1.0.0",
     "gulp-plumber": "^1.0.1",
     "gulp-replace": "^0.5.4",
     "gulp-uglify": "^1.4.2"

@@ -2,7 +2,6 @@ sudo: false
 language: node_js
 node_js: '0.12'
 before_script: npm i -g gulp
-script: gulp travis
 branches:
   only:
     - master

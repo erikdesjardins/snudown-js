@@ -90,7 +90,7 @@ function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) 
 	const buf = Module.allocate(Module.intArrayFromString(text), 'i8', Module.ALLOC_NORMAL);
 	const str = __markdown(buf, size, nofollow, target, toc_id_prefix, renderer, enable_toc);
 	Module._free(buf);
-	const string = Module.Pointer_stringify(str); // eslint-disable-line babel/new-cap
+	const string = Module.Pointer_stringify(str);
 	Module._free(str);
 	return string;
 }
