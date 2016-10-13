@@ -22,7 +22,7 @@ else
 	optimization="-O3 --memory-init-file 0"
 fi
 
-cmd="emcc $files -o build/snudowncore.js $optimization"
+cmd="emcc $files -o build/snudown.js --pre-js header.js --post-js footer.js $optimization"
 
 for i in "${options[@]}"; do
 	cmd="$cmd -s $i"

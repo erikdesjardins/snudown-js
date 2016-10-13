@@ -19,7 +19,7 @@ Basic usage:
 
 `Snudown.markdownWiki('<table scope="foo">'); // "<p><table scope="foo"></p>\n"`
 
-For more in-depth documentation, see the comments in [`snudown.js`](https://github.com/erikdesjardins/snudown-js/blob/master/snudown.js).
+For more in-depth documentation, see the comments in [`footer.js`](https://github.com/erikdesjardins/snudown-js/blob/master/footer.js).
 
 Building
 --------
