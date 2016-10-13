@@ -11,7 +11,7 @@ gperf src/html_entities.gperf > build/html_entities.c
 files="snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdini_href_e.c html/houdini_html_e.c html/html.c build/html_entities.c"
 include=("src" "html")
 exported=("default_renderer" "wiki_renderer" "snudown_md" "version" "main")
-options=("NO_EXIT_RUNTIME=1" "NO_FILESYSTEM=1" "NO_BROWSER=1" "NO_DYNAMIC_EXECUTION=1")
+options=("NO_EXIT_RUNTIME=1" "NO_FILESYSTEM=1" "NO_DYNAMIC_EXECUTION=1")
 
 if [ "$1" = "-d" ] || [ "$1" = "--debug" ]; then
 	optimization=""
