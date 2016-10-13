@@ -13,7 +13,7 @@ include=("src" "html")
 exported=("default_renderer" "wiki_renderer" "snudown_md" "version" "main")
 exported_runtime=("ccall" "cwrap" "lengthBytesUTF8" "allocate" "intArrayFromString" "ALLOC_NORMAL" "Pointer_stringify" "UTF8ToString")
 # ELIMINATE_DUPLICATE_FUNCTIONS=1 is expensive and only saves a few kB
-options=("NO_EXIT_RUNTIME=1" "NO_FILESYSTEM=1" "NO_DYNAMIC_EXECUTION=1")
+options=("ERROR_ON_UNDEFINED_SYMBOLS=1" "NO_EXIT_RUNTIME=1" "NO_FILESYSTEM=1" "NO_DYNAMIC_EXECUTION=1")
 
 if [ "$1" = "-d" ] || [ "$1" = "--debug" ]; then
 	optimization=""
