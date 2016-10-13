@@ -22,10 +22,8 @@
 function noop() {}
 // Silence logging (can't be otherwise disabled)
 var Module = {
+	ENVIRONMENT: 'WEB',
 	print: noop,
 	printErr: noop
 };
-// Trick it into thinking we're in the browser so it doesn't override our exports
-// Safe because it doesn't use browser APIs anyways (-s NO_BROWSER=1)
-var window = {};
 
