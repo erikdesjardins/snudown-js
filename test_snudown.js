@@ -1,4 +1,4 @@
-var Snudown = require('./dist/snudown.js');
+var Snudown = require('.');
 
 // http://ecmanaut.blogspot.ca/2006/07/encoding-decoding-utf8-in-javascript.html
 function encodeUTF8(s) {
