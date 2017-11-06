@@ -23,7 +23,7 @@ if [ "$1" = "-d" ] || [ "$1" = "--debug" ]; then
 	optimization=""
 else
 	echo "*** DEBUGGING OFF : use -d to enable ***"
-	optimization="-Oz --llvm-lto 1 --memory-init-file 0"
+	optimization="-Oz --llvm-lto 1 --memory-init-file 0 -DNDEBUG"
 fi
 
 cmd="emcc $files -o build/snudown.js --pre-js header.js --post-js footer.js $optimization"
