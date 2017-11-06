@@ -49,8 +49,35 @@ cmd="$cmd]"
 
 $cmd
 
-# Build snudown-js
+# Remove `require()` calls from compiled code
+# (used for filesystem operations, but aren't removed by `-s NO_FILESYSTEM=1`)
+sed -r 's/require\("[^"]*"\)/{}\/*removed &*\//g' ./build/snudown.js > ./build/snudown2.js
 
-./node_modules/gulp/bin/gulp.js build
+# Minify
+compress_options=("negate_iife=false" "hoist_props" "keep_fargs=false" "passes=3" "pure_getters=true" "toplevel" "unsafe")
+mangle_options=("toplevel")
+beautify_options=("beautify=false" "wrap_iife")
+
+uglify="./node_modules/uglify-js/bin/uglifyjs ./build/snudown2.js -o ./dist/snudown.js --comments"
+
+uglify="$uglify -c "
+for i in "${compress_options[@]}"; do
+	uglify="$uglify$i,"
+done
+uglify="${uglify:0:${#uglify} - 1}" # trim last comma
+
+uglify="$uglify -m "
+for i in "${mangle_options[@]}"; do
+	uglify="$uglify$i,"
+done
+uglify="${uglify:0:${#uglify} - 1}" # trim last comma
+
+uglify="$uglify -b "
+for i in "${beautify_options[@]}"; do
+	uglify="$uglify$i,"
+done
+uglify="${uglify:0:${#uglify} - 1}" # trim last comma
+
+$uglify
 
 rm -r "build"
