@@ -19,11 +19,7 @@
  */
 
 (function(exports) {'use strict';
-function noop() {}
-// Silence logging (can't be otherwise disabled)
 var Module = {
-	ENVIRONMENT: 'WEB',
-	print: noop,
-	printErr: noop
+	ENVIRONMENT: 'WEB'
 };
 
