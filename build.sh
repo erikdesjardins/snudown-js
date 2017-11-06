@@ -1,6 +1,7 @@
 #!/bin/bash
 
 mkdir -p "build"
+mkdir -p "dist"
 
 # Compile src/html_entities.gperf
 

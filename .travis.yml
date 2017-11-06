@@ -1,6 +1,28 @@
-sudo: false
+sudo: required
 language: node_js
 node_js: 6
 branches:
   only:
     - master
+    - /^v[0-9]/
+before_install:
+  - docker build -t emscripten .
+script:
+  - docker run --rm -v $(pwd):/src emscripten ./build.sh
+  - ls -lh dist
+  - node test_snudown.js
+deploy:
+  - provider: releases
+    api_key:
+      secure: HZNL8QnRFxJbB/2pMCruV/K1BnPk7q1qNWcAoCuI14K74cDlMjCUv+b1dgXg1Vcx6zBq6ob8cqjptCcsyVur2JK4bfPfwwwuAmlu1DlMfsd0DdCrHmVIWdcGrkqRmvt+1SieyIcQFarQQXU1clLdcneXiAmnFn5VvYv/YrCtc498TLpKSHAVPYXb2vHSHL4JqeXw70BWA11v2IXvzmXhMVoZmlDcZ5nfFCZaF5CTSiNcbkomWZdJYuLDiUn0W6kTpLEh+LUxteOCGKpy/D4fXkatEYGFs2iHfG25WX0RVSsw7Y7flplsPRX6voCPhpdH7Sv4C+j9Snq1yQ6Jpg7FpNO52V4QRdWUH4W1SUfxeNhrA2RvsAxdKlywbZ19ow5t0FdhHt1K5NoyDC8n9d3ufSHAMU14XdQB8Wyv0YT1+ykv7FychkIAAUiXPX8Pv6E0yw3R9cYE0vfs4Apu6yOtVq4s0vfG8Rjz9yiAS1XE1vUj2M5NqK6kOXLLpwsdBI7mTSAWkuvc6cQUBzgG9GNWPgKP1xeQXSEE1auXZoXaHLUTME6dQYT3cOn099gAU1m9yEfPTm26yJtZcrBtID2K3sLlQ3Eg0s0+SoPfxZczomLb2hkmd4TiP6BeCcG+8psArSt/apUFnrb8PNP36ebV5QtayeYwWuT27YIAJM9g53o=
+    file: dist/snudown.js
+    skip_cleanup: true
+    on:
+      tags: true
+  - provider: npm
+    email: 'public@erikdesjardins.io'
+    api_key:
+      secure: PHP/XlfNhUSzeCqncGXKW6fV+4v76iYy8+xgmmkBNzCw3uiu4yBsarDi2oYPjus0WL5PDzPSOcz3AM7FsTWv5cnqWRc3mkv+nWHk+En97JkeUmFc1gcCeaU+Be8pxC0pqCfWC4pwy0IqrRrauKCyjFxXK1eDMGa453CGf234ROWzyvzzyhLSBBmFvSyg7FpZ4Xie+bOGZEhS5BuIj903qyIKiwyiggjUseuH7829qe56SjILaV7vE5938EBX17GYCGVgpBbXo2PKkimN9DvWyoekH8+gYnOp6R0qrDKty/pff9Fsx0uVFnjOR0GOskMuroEA1pUbAmV/R8+hzGRpkGb4ARwQo6Co+E6Xw5uHDh28WCP9mej/WNXWbEpvP8GBzS8B8c1OMuUEKxtgKzTdZd0xNHQBteLMm8gJjl1TAfMCardFj2Z4ELjwLKrTUztOMZvV7EBvV8u5zs3+nxJ5nlP79/tqoSG3d4CIpmU/KjBdKtTwAtEO4uT08vz8slB7dNk6REbeozpwCLSwoM3V1WauNXx+HHhuplj3gsv3hN79OB85G3knNAEaulNksNARbEAxmArucq27hv0vprsyPuNuqCgYT0EpaoTkn84j+HhEf18JcOFlNHMCvP/ccgb4e8wwj9nfrisAWBaxp3eUd0mueWWULWrm1V5CJtknFDQ=
+    skip_cleanup: true
+    on:
+      tags: true
