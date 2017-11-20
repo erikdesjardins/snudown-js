@@ -2,7 +2,9 @@
 
 set -e -x
 
-mkdir -p "build"
+rm -r build || true
+mkdir -p build
+mkdir -p dist
 
 # Compile src/html_entities.gperf
 
@@ -10,48 +12,66 @@ gperf src/html_entities.gperf > build/html_entities.c
 
 # Build Snudown
 
-emcc snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdini_href_e.c html/houdini_html_e.c html/html.c build/html_entities.c \
--I src -I html \
---pre-js header.js --post-js footer.js \
--o build/snudown_emscripten.js \
--Oz --llvm-lto 1 --closure 2 -DNDEBUG \
---memory-init-file 0 \
--s MEM_INIT_METHOD=2 \
--s EXPORTED_FUNCTIONS=[\'_default_renderer\',\'_wiki_renderer\'] \
--s EXPORTED_RUNTIME_METHODS=[] \
--s NO_EXIT_RUNTIME=1 \
--s NO_FILESYSTEM=1 \
--s ABORTING_MALLOC=0 \
--s ERROR_ON_UNDEFINED_SYMBOLS=1 \
--s NODEJS_CATCH_EXIT=0 \
--s ENVIRONMENT=web \
--s TEXTDECODER=0 \
--s WASM=0 \
--Wno-tautological-compare \
+./llvmwasm/bin/clang snudown.c -o ./build/snudown_unlinked.bc -emit-llvm --target=wasm32 -Oz -c \
+-D NDEBUG \
+-I src \
+-I html \
+-include src/autolink.c \
+-include src/buffer.c \
+-include src/markdown.c \
+-include src/stack.c \
+-include html/houdini_href_e.c \
+-include html/houdini_html_e.c \
+-include html/html.c \
+-include build/html_entities.c \
+-nostdinc \
+-nostdlib \
+-fno-builtin \
+-isystem ./llvmwasm/musl/lib/musl-wasm32/include \
+-isystem ./llvmwasm/musl/lib/musl/include \
+-isystem ./llvmwasm/musl/include \
+-Wno-tautological-unsigned-zero-compare \
 -Wno-logical-op-parentheses \
--Wno-almost-asm \
 
-# Remove line breaks which closure randomly inserts, breaking sed replacements
-./node_modules/uglify-js/bin/uglifyjs ./build/snudown_emscripten.js -o ./build/snudown_oneline.js --comments
+./llvmwasm/bin/llvm-link ./build/snudown_unlinked.bc ./llvmwasm/musl/lib/webassembly.bc -o ./build/snudown.bc -only-needed
 
-# Remove IIFE wrapper (for exports)
-sed -r 's/\(function\(\)\{// ; s/\}\)\(\);//' ./build/snudown_oneline.js > ./build/snudown_nowrapper.js
+./llvmwasm/bin/llc ./build/snudown.bc -o ./build/snudown.s -asm-verbose=false
 
-# Minify
-./node_modules/uglify-js/bin/uglifyjs ./build/snudown_nowrapper.js -o ./build/snudown_uglify.js \
---comments \
---toplevel \
--c negate_iife=false,keep_fargs=false,passes=100,pure_getters,unsafe \
--m \
--b beautify=false,wrap_iife \
---define Module=undefined,print=undefined,printErr=undefined,TextDecoder=undefined \
+./llvmwasm/bin/s2wasm ./build/snudown.s --allocate-stack 65536 > ./build/snudown_unstripped.wat
 
-# Convert window exports to ES exports
-sed -r 's/,window\.(\w+)=function/;export function \1/g' ./build/snudown_uglify.js > ./build/snudown_exports.js
+# remove unnecessary exports
+sed -r '/^\s\(export\s"(default_renderer|wiki_renderer|memory|malloc|free)"/p ; /^\s\(export/d' ./build/snudown_unstripped.wat > ./build/snudown.wat
 
-# Generate modules
-mkdir -p "dist"
-echo "module.exports = require('esm')(module, { mode: 'all' })('./snudown_es.js');" > ./dist/snudown.js
-cp ./build/snudown_exports.js ./dist/snudown_es.js
+./llvmwasm/bin/wasm-opt ./build/snudown.wat -o ./build/snudown.wasm -Oz
 
-rm -r "build"
+./llvmwasm/bin/wasm-opt ./build/snudown.wasm --print > ./build/snudown_opt.wat
+
+# TODO: investigate this when it doesn't crash
+#./llvmwasm/bin/wasm2asm ./build/snudown_opt.wat -o ./dist/snudown_asm.js
+
+node -e " \
+var fs = require('fs'); \
+var wasm = fs.readFileSync('./build/snudown.wasm'); \
+var wasmString = String.fromCharCode.apply(null, new Uint8Array(wasm.buffer)); \
+var wrapper = fs.readFileSync('./wrapper.js', 'utf8'); \
+var interpolatedWrapper = wrapper.replace('COMPILED_WASM_PLACEHOLDER', JSON.stringify(wasmString)); \
+fs.writeFileSync('./build/snudown_unopt.js', interpolatedWrapper); \
+"
+
+./node_modules/terser/bin/uglifyjs ./build/snudown_unopt.js -o ./build/snudown_opt.js -m -c --toplevel --comments
+
+node -e " \
+var fs = require('fs'); \
+var path = require('path'); \
+var package = require('./package.json'); \
+var source = fs.readFileSync('./build/snudown_opt.js'); \
+fs.writeFileSync(package.browser, \
+	source); \
+fs.writeFileSync(package.module, \
+	'import util from \"util\";\\n' + \
+	'var TextDecoder = util.TextDecoder;\\n' + \
+	'var TextEncoder = util.TextEncoder;\\n' + \
+	source); \
+fs.writeFileSync(package.main, \
+	'module.exports = require(\"esm\")(module, { mode: \"all\" })(\"./' + path.basename(package.module) + '\");'); \
+"

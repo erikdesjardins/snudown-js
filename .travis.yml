@@ -1,14 +1,14 @@
 sudo: required
 language: node_js
-node_js: 6
+node_js: 8
 branches:
   only:
     - master
     - /^v[0-9]/
 before_install:
-  - docker build -t emscripten .
+  - ./install.sh 0
 script:
-  - docker run --rm -v $(pwd):/src emscripten ./build.sh
+  - ./build.sh
   - ls -lh dist
   - node test_snudown.js
 deploy:
@@ -17,7 +17,8 @@ deploy:
       secure: HZNL8QnRFxJbB/2pMCruV/K1BnPk7q1qNWcAoCuI14K74cDlMjCUv+b1dgXg1Vcx6zBq6ob8cqjptCcsyVur2JK4bfPfwwwuAmlu1DlMfsd0DdCrHmVIWdcGrkqRmvt+1SieyIcQFarQQXU1clLdcneXiAmnFn5VvYv/YrCtc498TLpKSHAVPYXb2vHSHL4JqeXw70BWA11v2IXvzmXhMVoZmlDcZ5nfFCZaF5CTSiNcbkomWZdJYuLDiUn0W6kTpLEh+LUxteOCGKpy/D4fXkatEYGFs2iHfG25WX0RVSsw7Y7flplsPRX6voCPhpdH7Sv4C+j9Snq1yQ6Jpg7FpNO52V4QRdWUH4W1SUfxeNhrA2RvsAxdKlywbZ19ow5t0FdhHt1K5NoyDC8n9d3ufSHAMU14XdQB8Wyv0YT1+ykv7FychkIAAUiXPX8Pv6E0yw3R9cYE0vfs4Apu6yOtVq4s0vfG8Rjz9yiAS1XE1vUj2M5NqK6kOXLLpwsdBI7mTSAWkuvc6cQUBzgG9GNWPgKP1xeQXSEE1auXZoXaHLUTME6dQYT3cOn099gAU1m9yEfPTm26yJtZcrBtID2K3sLlQ3Eg0s0+SoPfxZczomLb2hkmd4TiP6BeCcG+8psArSt/apUFnrb8PNP36ebV5QtayeYwWuT27YIAJM9g53o=
     file:
       - dist/snudown.js
-      - dist/snudown_es.js
+      - dist/snudown_sync.js
+      - dist/snudown_async.js
     skip_cleanup: true
     on:
       tags: true

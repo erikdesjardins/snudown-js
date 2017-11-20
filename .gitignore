@@ -1,5 +1,6 @@
 build/
 dist/
+llvmwasm/
 node_modules/
 .idea/
 snudown.egg-info/
