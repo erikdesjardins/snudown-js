@@ -78,6 +78,9 @@ void bufputs(struct buf *, const char *);
 /* bufputc: appends a single char to a buffer */
 void bufputc(struct buf *, int);
 
+/* bufputi: appends a formatted integer to a buffer, like vsnprintf("%d") */
+void bufputi(struct buf *, int);
+
 /* bufrelease: decrease the reference count and free the buffer if needed */
 void bufrelease(struct buf *);
 
@@ -86,9 +89,6 @@ void bufreset(struct buf *);
 
 /* bufslurp: removes a given number of bytes from the head of the array */
 void bufslurp(struct buf *, size_t);
-
-/* bufprintf: formatted printing to a buffer */
-void bufprintf(struct buf *, const char *, ...) __attribute__ ((format (printf, 2, 3)));
 
 /* buftruncate: truncates the buffer at `size` */
 int buftruncate(struct buf *buf, size_t size);
