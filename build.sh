@@ -17,13 +17,13 @@ exported=("default_renderer" "wiki_renderer" "snudown_md" "version" "main")
 exported_runtime=("ccall" "cwrap" "lengthBytesUTF8" "allocate" "intArrayFromString" "ALLOC_NORMAL" "Pointer_stringify" "UTF8ToString")
 # ELIMINATE_DUPLICATE_FUNCTIONS=1 is expensive and only saves a few kB
 # MEM_INIT_METHOD=2 may not compile correctly on Windows
-options=("ERROR_ON_UNDEFINED_SYMBOLS=1" "NO_EXIT_RUNTIME=1" "NO_FILESYSTEM=1" "NO_DYNAMIC_EXECUTION=1" "MEM_INIT_METHOD=2" "NODEJS_CATCH_EXIT=0")
+options=("ERROR_ON_UNDEFINED_SYMBOLS=1" "NO_EXIT_RUNTIME=1" "NO_FILESYSTEM=1" "MEM_INIT_METHOD=2" "NODEJS_CATCH_EXIT=0")
 
 if [ "$1" = "-d" ] || [ "$1" = "--debug" ]; then
 	optimization=""
 else
 	echo "*** DEBUGGING OFF : use -d to enable ***"
-	optimization="-Oz --llvm-lto 1 --memory-init-file 0 -DNDEBUG -s ABORTING_MALLOC=0"
+	optimization="-Oz --llvm-lto 1 --closure 1 --memory-init-file 0 -DNDEBUG -s ABORTING_MALLOC=0"
 fi
 
 cmd="emcc $files -o build/snudown.js --pre-js header.js --post-js footer.js $optimization"
