@@ -11,7 +11,7 @@ function markdown(
 		tocIdPrefix, // Added to the `id` of each TOC link, i.e. `#PREFIXtoc_0`.
 	} */
 ) /*: string */ {
-	return _markdown(text, options, asm['_default_renderer']());
+	return _markdown('default_renderer', text, options);
 }
 
 /**
@@ -27,10 +27,10 @@ function markdownWiki(
 		tocIdPrefix, // Added to the `id` of each TOC link, i.e. `#PREFIXtoc_0`.
 	} */
 ) /*: string */ {
-	return _markdown(text, options, asm['_wiki_renderer']());
+	return _markdown('wiki_renderer', text, options);
 }
 
-function _markdown(text, options, renderer) {
+function _markdown(fn, text, options) {
 	if (typeof text !== 'string') text = '';
 	var size = lengthBytesUTF8(text); // excludes null terminator
 
@@ -41,10 +41,10 @@ function _markdown(text, options, renderer) {
 	var enable_toc = options['enableToc'] ? 1 : 0;
 
 	var ptr = ccall(
-		'snudown_md',
+		fn,
 		'number',
-		['string', 'number', 'number', 'string', 'string', 'number', 'number'],
-		[text, size, nofollow, target, toc_id_prefix, renderer, enable_toc]
+		['string', 'number', 'number', 'string', 'string', 'number'],
+		[text, size, nofollow, target, toc_id_prefix, enable_toc]
 	);
 	var string = UTF8ToString(ptr);
 

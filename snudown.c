@@ -30,6 +30,7 @@ struct module_state {
 	struct snudown_renderopt options;
 };
 
+static int sundown_initialized[RENDERER_COUNT];
 static struct snudown_renderer sundown[RENDERER_COUNT];
 
 static char* html_element_whitelist[] = {"tr", "th", "td", "table", "tbody", "thead", "tfoot", "caption", NULL};
@@ -103,6 +104,8 @@ static struct sd_markdown* make_custom_renderer(struct module_state* state,
 }
 
 void init_default_renderer(void) {
+	if (sundown_initialized[RENDERER_USERTEXT]) return;
+	sundown_initialized[RENDERER_USERTEXT] = 1;
 	sundown[RENDERER_USERTEXT].main_renderer = make_custom_renderer(&usertext_state, snudown_default_render_flags, snudown_default_md_flags, 0);
 	sundown[RENDERER_USERTEXT].toc_renderer = make_custom_renderer(&usertext_toc_state, snudown_default_render_flags, snudown_default_md_flags, 1);
 	sundown[RENDERER_USERTEXT].state = &usertext_state;
@@ -110,24 +113,17 @@ void init_default_renderer(void) {
 }
 
 void init_wiki_renderer(void) {
+	if (sundown_initialized[RENDERER_WIKI]) return;
+	sundown_initialized[RENDERER_WIKI] = 1;
 	sundown[RENDERER_WIKI].main_renderer = make_custom_renderer(&wiki_state, snudown_wiki_render_flags, snudown_default_md_flags, 0);
 	sundown[RENDERER_WIKI].toc_renderer = make_custom_renderer(&wiki_toc_state, snudown_wiki_render_flags, snudown_default_md_flags, 1);
 	sundown[RENDERER_WIKI].state = &wiki_state;
 	sundown[RENDERER_WIKI].toc_state = &wiki_toc_state;
 }
 
-/* Emscripten's enum bindings seem to only work with C++ */
-int default_renderer(void) {
-	return RENDERER_USERTEXT;
-}
-
-int wiki_renderer(void) {
-	return RENDERER_WIKI;
-}
-
 /* size param is necessary because text may contain null */
 const char*
-snudown_md(char* text, size_t size, int nofollow/*=0*/, char* target/*=NULL*/, char* toc_id_prefix/*=NULL*/, int renderer/*=RENDERER_USERTEXT*/, int enable_toc/*=0*/) {
+snudown_md(char* text, size_t size, int nofollow, char* target, char* toc_id_prefix, int renderer, int enable_toc) {
 	struct buf ib, *ob;
 	char* result_text;
 	struct snudown_renderer _snudown;
@@ -182,12 +178,12 @@ snudown_md(char* text, size_t size, int nofollow/*=0*/, char* target/*=NULL*/, c
 	return result_text;
 }
 
-const char* version(void) {
-	return SNUDOWN_VERSION;
-}
-
-int main(void) {
+const char* default_renderer(char* text, size_t size, int nofollow, char* target, char* toc_id_prefix, int enable_toc) {
 	init_default_renderer();
-	init_wiki_renderer();
+	return snudown_md(text, size, nofollow, target, toc_id_prefix, RENDERER_USERTEXT, enable_toc);
 }
 
+const char* wiki_renderer(char* text, size_t size, int nofollow, char* target, char* toc_id_prefix, int enable_toc) {
+	init_wiki_renderer();
+	return snudown_md(text, size, nofollow, target, toc_id_prefix, RENDERER_WIKI, enable_toc);
+}

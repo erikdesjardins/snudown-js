@@ -13,7 +13,7 @@ gperf src/html_entities.gperf > build/html_entities.c
 
 files="snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdini_href_e.c html/houdini_html_e.c html/html.c build/html_entities.c"
 include=("src" "html")
-exported=("default_renderer" "wiki_renderer" "snudown_md" "main")
+exported=("default_renderer" "wiki_renderer")
 options=("ERROR_ON_UNDEFINED_SYMBOLS=1" "NO_EXIT_RUNTIME=1" "EXPORTED_RUNTIME_METHODS=[]" "NO_FILESYSTEM=1" "MEM_INIT_METHOD=2" "NODEJS_CATCH_EXIT=0")
 
 if [ "$1" = "-d" ] || [ "$1" = "--debug" ]; then
@@ -42,9 +42,12 @@ cmd="$cmd]"
 
 $cmd
 
+# Remove line breaks which closure randomly inserts, breaking sed replacements
+./node_modules/uglify-es/bin/uglifyjs ./build/snudown_emscripten.js -o ./build/snudown_oneline.js --comments
+
 # Remove `require()` calls from compiled code
 # (used for filesystem operations, but aren't removed by `-s NO_FILESYSTEM=1`)
-sed -r 's/require\("[^"]*"\)/{}\/*removed &*\//g' ./build/snudown_emscripten.js > ./build/snudown_norequire.js
+sed -r 's/require\("[^"]*"\)/{}\/*removed &*\//g' ./build/snudown_oneline.js > ./build/snudown_norequire.js
 # Remove IIFE wrapper (for exports)
 sed -r 's/^\(function\(\)\{// ; s/\}\)\(\);//' ./build/snudown_norequire.js > ./build/snudown_nowrapper.js
 # Convert window exports to ES exports
