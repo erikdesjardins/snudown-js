@@ -1,114 +1,58 @@
 /**
- * Snudown's version number, usually similar to: "3.2.1".
- * Equivalent to python: `__version__`.
- * @type {string}
- */
-var version = UTF8ToString(asm['_version']());
-
-/**
- * The index of the usertext renderer.
- * Can be passed to {@link markdown}.
- * Equivalent to python: `RENDERER_USERTEXT`.
- * @type {number}
- */
-var RENDERER_USERTEXT = asm['_default_renderer']();
-
-/**
- * The index of the wiki renderer.
- * Can be passed to {@link markdown}.
- * Equivalent to python: `RENDERER_WIKI`.
- * @type {number}
- */
-var RENDERER_WIKI = asm['_wiki_renderer']();
-
-/**
- * Render markdown `text` to an HTML string.
- * Arguments may be passed positionally: `markdown('#/u/hi', true, '_top', RENDERER_WIKI, true, 'prefix_')`,
- * or by name in a single object: `markdown({ text: '#/u/hi', nofollow: true, target: '_top', renderer: RENDERER_WIKI, enableToc: true, tocIdPrefix: 'prefix_' })`.
+ * Render markdown `text` to an HTML string using the usertext renderer.
  * Equivalent to python: `markdown`.
- * @param {string} text
- * @param {boolean} [nofollow=false] Whether to add `rel="nofollow"` to all links.
- * @param {string} [target=null] The `target` property of all links.
- * @param {number} [renderer=RENDERER_USERTEXT]
- * @param {boolean} [enableToc=false] Whether to create a table of contents (Reddit generates the TOC separately).
- * @param {string} [tocIdPrefix=null] Added to the `id` of each TOC link, i.e. `#PREFIXtoc_0`.
- * @returns {string} The rendered HTML.
  */
-function markdown(text, nofollow, target, renderer, enableToc, tocIdPrefix) {
-	if (typeof text === 'object' && text !== null) {
-		nofollow = text['nofollow'];
-		target = text['target'];
-		renderer = text['renderer'];
-		enableToc = text['enableToc'];
-		tocIdPrefix = text['tocIdPrefix'];
-		text = text['text'];
-	}
-	if (typeof text !== 'string') {
-		text = '';
-	}
-	if (typeof renderer !== 'number') {
-		renderer = RENDERER_USERTEXT;
-	}
-	return _markdown(text, nofollow, target, tocIdPrefix, renderer, enableToc);
+function markdown(
+	text /*: string */,
+	options /*: ?{
+		nofollow,    // Whether to add `rel="nofollow"` to all links.
+		target,      // The `target` property of all links.
+		enableToc,   // Whether to create a table of contents (Reddit does not use this to generate their TOC).
+		tocIdPrefix, // Added to the `id` of each TOC link, i.e. `#PREFIXtoc_0`.
+	} */
+) /*: string */ {
+	return _markdown(text, options, asm['_default_renderer']());
 }
 
 /**
- * Equivalent to {@link markdown}, but always uses {@link RENDERER_WIKI}.
- * @param {string} text
- * @param {boolean} [nofollow=false]
- * @param {string} [target=null]
- * @param {boolean} [enableToc=false]
- * @param {string} [tocIdPrefix=null]
- * @returns {string} The rendered HTML.
+ * Render markdown `text` to an HTML string using the wiki renderer.
+ * Equivalent to python: `markdown`.
  */
-function markdownWiki(text, nofollow, target, enableToc, tocIdPrefix) {
-	if (typeof text === 'object' && text !== null) {
-		nofollow = text['nofollow'];
-		target = text['target'];
-		enableToc = text['enableToc'];
-		tocIdPrefix = text['tocIdPrefix'];
-		text = text['text'];
-	}
-	if (typeof text !== 'string') {
-		text = '';
-	}
-	return _markdown(text, nofollow, target, tocIdPrefix, RENDERER_WIKI, enableToc);
+function markdownWiki(
+	text /*: string */,
+	options /*: ?{
+		nofollow,    // Whether to add `rel="nofollow"` to all links.
+		target,      // The `target` property of all links.
+		enableToc,   // Whether to create a table of contents (Reddit does not use this to generate their TOC).
+		tocIdPrefix, // Added to the `id` of each TOC link, i.e. `#PREFIXtoc_0`.
+	} */
+) /*: string */ {
+	return _markdown(text, options, asm['_wiki_renderer']());
 }
 
-/**
- * @private
- * @param {string} text
- * @param {boolean} nofollow
- * @param {string} target
- * @param {string} toc_id_prefix
- * @param {number} renderer
- * @param {boolean} enable_toc
- * @returns {string} The rendered string.
- */
-function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) {
-	// not using Emscripten's automatic string handling since 'text'.length is unreliable for UTF-8
+function _markdown(text, options, renderer) {
+	if (typeof text !== 'string') text = '';
 	var size = lengthBytesUTF8(text); // excludes null terminator
-	var buf = allocate(intArrayFromString(text), 'i8', ALLOC_NORMAL);
-	var str = ccall(
+
+	if (typeof options !== 'object' || options === null) options = {};
+	var nofollow = options['nofollow'] ? 1 : 0;
+	var target = typeof options['target'] === 'string' ? options['target'] : null;
+	var toc_id_prefix = typeof options['tocIdPrefix'] === 'string' ? options['tocIdPrefix'] : null;
+	var enable_toc = options['enableToc'] ? 1 : 0;
+
+	var ptr = ccall(
 		'snudown_md',
 		'number',
-		['number', 'number', 'number', 'string', 'string', 'number', 'number'],
-		[buf, size, nofollow, target, toc_id_prefix, renderer, enable_toc]
+		['string', 'number', 'number', 'string', 'string', 'number', 'number'],
+		[text, size, nofollow, target, toc_id_prefix, renderer, enable_toc]
 	);
-	asm['_free'](buf);
-	var string = UTF8ToString(str);
-	asm['_free'](str);
+	var string = UTF8ToString(ptr);
+
+	asm['_free'](ptr);
+
 	return string;
 }
 
-exports['version'] = version;
-exports['RENDERER_USERTEXT'] = RENDERER_USERTEXT;
-exports['RENDERER_WIKI'] = RENDERER_WIKI;
-exports['markdown'] = markdown;
-exports['markdownWiki'] = markdownWiki;
-
-if (typeof define === 'function') {
-	define(exports);
-}
-})(typeof exports !== 'undefined' ? exports : typeof window !== 'undefined' ? (window['Snudown'] = {}) : {});
-
+window['markdown'] = markdown;
+window['markdownWiki'] = markdownWiki;
+})();

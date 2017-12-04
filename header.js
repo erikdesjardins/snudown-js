@@ -18,8 +18,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-(function(exports) {'use strict';
+(function() {'use strict';
 Module = {
 	'ENVIRONMENT': 'WEB'
 };
-

@@ -456,85 +456,71 @@ var wiki_cases = {
         '<p><table scope="foo"></p>\n',
 };
 
-function runTest(input, expected_output, fn) {
-    fn = fn || Snudown.markdown;
+function runTest(fn, input, expected_output) {
     var output = fn.apply(null, input);
     if (output !== expected_output)
         throw new Error(
             "TEST FAILED:" +
-            "\n       input: " + (input[0].text || input[0]) +
+            "\n       input: " + input[0] +
             "\n    expected: " + expected_output +
             "\n      actual: " + output
         );
 }
 
 for (var input in wiki_cases) {
-    runTest([{ text: input, renderer: Snudown.RENDERER_WIKI }], wiki_cases[input]);
+    runTest(Snudown.markdownWiki, [input], wiki_cases[input]);
 }
 
 for (var input in cases) {
-    runTest([input], cases[input]);
+    runTest(Snudown.markdown, [input], cases[input]);
 }
 
 [[
-    ['/u/test', true, '_top'],
+	Snudown.markdown,
+    ['/u/test', { nofollow: true, target: '_top' }],
     '<p><a href="/u/test" rel="nofollow" target="_top">/u/test</a></p>\n'
 ], [
-    [{ text: '/u/test', nofollow: true, target: '_top' }],
-    '<p><a href="/u/test" rel="nofollow" target="_top">/u/test</a></p>\n'
+	Snudown.markdownWiki,
+    ['<table scope="foo">', { nofollow: null, target: null }],
+    '<p><table scope="foo"></p>\n',
 ], [
-    ['<table scope="foo">', null, null, Snudown.RENDERER_WIKI],
-    '<p><table scope="foo"></p>\n'
-], [
-    ['<table scope="foo">', null, null, Snudown.RENDERER_USERTEXT],
+	Snudown.markdown,
+	['<table scope="foo">', { nofollow: null, target: null }],
     '<p>&lt;table scope=&quot;foo&quot;&gt;</p>\n'
 ], [
-    ['###Test', null, null, null, true, 'prefixed_'],
+	Snudown.markdown,
+    ['###Test', { enableToc: true, tocIdPrefix: 'prefixed_' }],
     '<div class="toc">\n<ul>\n<li>\n<a href="#prefixed_toc_0">Test</a>\n</li>\n</ul>\n</div>\n\n<h3 id="prefixed_toc_0">Test</h3>\n'
 ], [
-    [{ text: '###Test', enableToc: true, tocIdPrefix: 'prefixed_' }],
-    '<div class="toc">\n<ul>\n<li>\n<a href="#prefixed_toc_0">Test</a>\n</li>\n</ul>\n</div>\n\n<h3 id="prefixed_toc_0">Test</h3>\n'
-], [
-    // undefined text, markdown
+    // undefined text
+	Snudown.markdown,
     [],
     ''
 ], [
-    // null text, markdown
+    // null text
+	Snudown.markdown,
     [null],
     ''
 ], [
-    // undefined text, markdownWiki
+    // undefined text
+	Snudown.markdownWiki,
     [],
     '',
-    Snudown.markdownWiki
 ], [
-    // null text, markdownWiki
+    // null text
+	Snudown.markdownWiki,
     [null],
     '',
-    Snudown.markdownWiki
 ], [
-    // passing a renderer to markdownWiki doesn't override RENDERER_WIKI
-    [{ text: '<table scope="foo">', renderer: Snudown.RENDERER_USERTEXT }],
-    '<p><table scope="foo"></p>\n',
-    Snudown.markdownWiki
-], [
-    // all positional arguments, markdown
-    ['###Test\n<table scope="foo">\n/u/test', true, '_top', null, true, 'prefixed_'],
+    // all named arguments
+	Snudown.markdown,
+    ['###Test\n<table scope="foo">\n/u/test', { nofollow: true, target: '_top', enableToc: true, tocIdPrefix: 'prefixed_' }],
     '<div class="toc">\n<ul>\n<li>\n<a href="#prefixed_toc_0">Test</a>\n</li>\n</ul>\n</div>\n\n<h3 id="prefixed_toc_0">Test</h3>\n\n<p>&lt;table scope=&quot;foo&quot;&gt;\n<a href="/u/test" rel="nofollow" target="_top">/u/test</a></p>\n'
 ], [
-    // all named arguments, markdown
-    [{ text: '###Test\n<table scope="foo">\n/u/test', nofollow: true, target: '_top', enableToc: true, tocIdPrefix: 'prefixed_' }],
-    '<div class="toc">\n<ul>\n<li>\n<a href="#prefixed_toc_0">Test</a>\n</li>\n</ul>\n</div>\n\n<h3 id="prefixed_toc_0">Test</h3>\n\n<p>&lt;table scope=&quot;foo&quot;&gt;\n<a href="/u/test" rel="nofollow" target="_top">/u/test</a></p>\n'
-], [
-    // all positional arguments, markdownWiki
-    ['###Test\n<table scope="foo">\n/u/test', true, '_top', true, 'prefixed_'],
+    // all named arguments
+	Snudown.markdownWiki,
+    ['###Test\n<table scope="foo">\n/u/test', { nofollow: true, target: '_top', enableToc: true, tocIdPrefix: 'prefixed_' }],
     '<div class="toc">\n<ul>\n<li>\n<a href="#prefixed_toc_0">Test</a>\n</li>\n</ul>\n</div>\n\n<h3 id="prefixed_toc_0">Test</h3>\n\n<p><table scope="foo">\n<a href="/u/test" rel="nofollow" target="_top">/u/test</a></p>\n',
-    Snudown.markdownWiki
-], [
-    // all named arguments, markdownWiki
-    [{ text: '###Test\n<table scope="foo">\n/u/test', nofollow: true, target: '_top', enableToc: true, tocIdPrefix: 'prefixed_' }],
-    '<div class="toc">\n<ul>\n<li>\n<a href="#prefixed_toc_0">Test</a>\n</li>\n</ul>\n</div>\n\n<h3 id="prefixed_toc_0">Test</h3>\n\n<p><table scope="foo">\n<a href="/u/test" rel="nofollow" target="_top">/u/test</a></p>\n',
-    Snudown.markdownWiki
 ]].forEach(function(testArgs) {
     runTest.apply(null, testArgs);
 });
