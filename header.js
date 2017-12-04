@@ -19,7 +19,7 @@
  */
 
 (function(exports) {'use strict';
-var Module = {
-	ENVIRONMENT: 'WEB'
+Module = {
+	'ENVIRONMENT': 'WEB'
 };
 

@@ -3,7 +3,7 @@
  * Equivalent to python: `__version__`.
  * @type {string}
  */
-var version = Module.ccall('version', 'string');
+var version = UTF8ToString(asm['_version']());
 
 /**
  * The index of the usertext renderer.
@@ -11,7 +11,7 @@ var version = Module.ccall('version', 'string');
  * Equivalent to python: `RENDERER_USERTEXT`.
  * @type {number}
  */
-var RENDERER_USERTEXT = Module.ccall('default_renderer', 'number');
+var RENDERER_USERTEXT = asm['_default_renderer']();
 
 /**
  * The index of the wiki renderer.
@@ -19,7 +19,7 @@ var RENDERER_USERTEXT = Module.ccall('default_renderer', 'number');
  * Equivalent to python: `RENDERER_WIKI`.
  * @type {number}
  */
-var RENDERER_WIKI = Module.ccall('wiki_renderer', 'number');
+var RENDERER_WIKI = asm['_wiki_renderer']();
 
 /**
  * Render markdown `text` to an HTML string.
@@ -36,12 +36,12 @@ var RENDERER_WIKI = Module.ccall('wiki_renderer', 'number');
  */
 function markdown(text, nofollow, target, renderer, enableToc, tocIdPrefix) {
 	if (typeof text === 'object' && text !== null) {
-		nofollow = text.nofollow;
-		target = text.target;
-		renderer = text.renderer;
-		enableToc = text.enableToc;
-		tocIdPrefix = text.tocIdPrefix;
-		text = text.text;
+		nofollow = text['nofollow'];
+		target = text['target'];
+		renderer = text['renderer'];
+		enableToc = text['enableToc'];
+		tocIdPrefix = text['tocIdPrefix'];
+		text = text['text'];
 	}
 	if (typeof text !== 'string') {
 		text = '';
@@ -63,23 +63,17 @@ function markdown(text, nofollow, target, renderer, enableToc, tocIdPrefix) {
  */
 function markdownWiki(text, nofollow, target, enableToc, tocIdPrefix) {
 	if (typeof text === 'object' && text !== null) {
-		nofollow = text.nofollow;
-		target = text.target;
-		enableToc = text.enableToc;
-		tocIdPrefix = text.tocIdPrefix;
-		text = text.text;
+		nofollow = text['nofollow'];
+		target = text['target'];
+		enableToc = text['enableToc'];
+		tocIdPrefix = text['tocIdPrefix'];
+		text = text['text'];
 	}
 	if (typeof text !== 'string') {
 		text = '';
 	}
 	return _markdown(text, nofollow, target, tocIdPrefix, RENDERER_WIKI, enableToc);
 }
-
-/**
- * @private
- * @returns {number} A pointer to the rendered string.
- */
-var __markdown = Module.cwrap('snudown_md', 'number', ['number', 'number', 'number', 'string', 'string', 'number', 'number']);
 
 /**
  * @private
@@ -93,23 +87,28 @@ var __markdown = Module.cwrap('snudown_md', 'number', ['number', 'number', 'numb
  */
 function _markdown(text, nofollow, target, toc_id_prefix, renderer, enable_toc) {
 	// not using Emscripten's automatic string handling since 'text'.length is unreliable for UTF-8
-	var size = Module.lengthBytesUTF8(text); // excludes null terminator
-	var buf = Module.allocate(Module.intArrayFromString(text), 'i8', Module.ALLOC_NORMAL);
-	var str = __markdown(buf, size, nofollow, target, toc_id_prefix, renderer, enable_toc);
-	Module._free(buf);
-	var string = Module.Pointer_stringify(str);
-	Module._free(str);
+	var size = lengthBytesUTF8(text); // excludes null terminator
+	var buf = allocate(intArrayFromString(text), 'i8', ALLOC_NORMAL);
+	var str = ccall(
+		'snudown_md',
+		'number',
+		['number', 'number', 'number', 'string', 'string', 'number', 'number'],
+		[buf, size, nofollow, target, toc_id_prefix, renderer, enable_toc]
+	);
+	asm['_free'](buf);
+	var string = UTF8ToString(str);
+	asm['_free'](str);
 	return string;
 }
 
-exports.version = version;
-exports.RENDERER_USERTEXT = RENDERER_USERTEXT;
-exports.RENDERER_WIKI = RENDERER_WIKI;
-exports.markdown = markdown;
-exports.markdownWiki = markdownWiki;
+exports['version'] = version;
+exports['RENDERER_USERTEXT'] = RENDERER_USERTEXT;
+exports['RENDERER_WIKI'] = RENDERER_WIKI;
+exports['markdown'] = markdown;
+exports['markdownWiki'] = markdownWiki;
 
 if (typeof define === 'function') {
 	define(exports);
 }
-})(typeof exports !== 'undefined' ? exports : typeof window !== 'undefined' ? (window.Snudown = {}) : {});
+})(typeof exports !== 'undefined' ? exports : typeof window !== 'undefined' ? (window['Snudown'] = {}) : {});
 
