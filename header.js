@@ -19,6 +19,8 @@
  */
 
 (function() {'use strict';
+var module, process;
+
 Module = {
 	'ENVIRONMENT': 'WEB'
 };
