@@ -34,13 +34,13 @@ function _stackAllocString(str) {
 	// https://github.com/kripken/emscripten/blob/3ebf0eed375120626ae5c2233b26bf236ea90046/src/preamble.js#L148
 	// at most 4 bytes per UTF-8 code point, +1 for the trailing '\0'
 	var len = (str.length << 2) + 1;
-	var ptr = Runtime.stackAlloc(len);
+	var ptr = stackAlloc(len);
 	stringToUTF8(str, ptr, len);
 	return ptr;
 }
 
 function _markdown(renderer, text, options) {
-	var stack = Runtime.stackSave();
+	var stack = stackSave();
 
 	if (typeof text !== 'string') text = '';
 	var str = _stackAllocString(text);
@@ -57,7 +57,7 @@ function _markdown(renderer, text, options) {
 
 	asm['_free'](ptr);
 
-	Runtime.stackRestore(stack);
+	stackRestore(stack);
 
 	return string;
 }
