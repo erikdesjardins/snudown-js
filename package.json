@@ -1,6 +1,6 @@
 {
   "name": "snudown-js",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "a 'native' port of Snudown to JavaScript",
   "main": "dist/snudown.js",
   "module": "dist/snudown_es.js",
