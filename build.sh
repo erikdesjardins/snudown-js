@@ -34,7 +34,7 @@ emcc snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdi
 # (used for filesystem operations, but aren't removed by `-s NO_FILESYSTEM=1`)
 sed -r 's/require\("[^"]*"\)/{}\/*removed &*\//g' ./build/snudown_oneline.js > ./build/snudown_norequire.js
 # Remove IIFE wrapper (for exports)
-sed -r 's/^\(function\(\)\{// ; s/\}\)\(\);//' ./build/snudown_norequire.js > ./build/snudown_nowrapper.js
+sed -r 's/\(function\(\)\{// ; s/\}\)\(\);//' ./build/snudown_norequire.js > ./build/snudown_nowrapper.js
 # Convert window exports to ES exports
 sed -r 's/window\.(\w+)=function/export function \1/g' ./build/snudown_nowrapper.js > ./build/snudown_exports.js
 
@@ -44,6 +44,7 @@ sed -r 's/window\.(\w+)=function/export function \1/g' ./build/snudown_nowrapper
 -c negate_iife=false,keep_fargs=false,passes=10,pure_getters=true,toplevel,unsafe \
 -m toplevel \
 -b beautify=false,wrap_iife \
+--define Module=null \
 
 # Generate modules
 mkdir -p "dist"
