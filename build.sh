@@ -26,29 +26,32 @@ emcc snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdi
 -s NODEJS_CATCH_EXIT=0 \
 -Wno-tautological-compare \
 -Wno-logical-op-parentheses \
+-Wno-almost-asm \
 
 # Remove line breaks which closure randomly inserts, breaking sed replacements
-./node_modules/uglify-es/bin/uglifyjs ./build/snudown_emscripten.js -o ./build/snudown_oneline.js --comments
+./node_modules/uglify-js/bin/uglifyjs ./build/snudown_emscripten.js -o ./build/snudown_oneline.js --comments
 
 # Remove `require()` calls from compiled code
 # (used for filesystem operations, but aren't removed by `-s NO_FILESYSTEM=1`)
 sed -r 's/require\("[^"]*"\)/{}\/*removed &*\//g' ./build/snudown_oneline.js > ./build/snudown_norequire.js
 # Remove IIFE wrapper (for exports)
 sed -r 's/\(function\(\)\{// ; s/\}\)\(\);//' ./build/snudown_norequire.js > ./build/snudown_nowrapper.js
-# Convert window exports to ES exports
-sed -r 's/window\.(\w+)=function/export function \1/g' ./build/snudown_nowrapper.js > ./build/snudown_exports.js
 
 # Minify
-./node_modules/uglify-es/bin/uglifyjs ./build/snudown_exports.js -o ./build/snudown_uglify.js \
+./node_modules/uglify-js/bin/uglifyjs ./build/snudown_nowrapper.js -o ./build/snudown_uglify.js \
 --comments \
--c negate_iife=false,keep_fargs=false,passes=10,pure_getters=true,toplevel,unsafe \
--m toplevel \
+--toplevel \
+-c negate_iife=false,keep_fargs=false,passes=10,pure_getters,unsafe \
+-m \
 -b beautify=false,wrap_iife \
 --define Module=null \
+
+# Convert window exports to ES exports
+sed -r 's/,window\.(\w+)=function/;export function \1/g' ./build/snudown_uglify.js > ./build/snudown_exports.js
 
 # Generate modules
 mkdir -p "dist"
 echo "module.exports = require('@std/esm')(module, { esm: 'js' })('./snudown_es.js');" > ./dist/snudown.js
-cp ./build/snudown_uglify.js ./dist/snudown_es.js
+cp ./build/snudown_exports.js ./dist/snudown_es.js
 
 rm -r "build"
