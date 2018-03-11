@@ -162,6 +162,15 @@ rndr_blockquote(struct buf *ob, const struct buf *text, void *opaque)
 	BUFPUTSL(ob, "</blockquote>\n");
 }
 
+static void
+rndr_blockspoiler(struct buf *ob, const struct buf *text, void *opaque)
+{
+	if (ob->size) bufputc(ob, '\n');
+	BUFPUTSL(ob, "<blockquote class=\"md-spoiler-text\">\n");
+	if (text) bufput(ob, text->data, text->size);
+	BUFPUTSL(ob, "</blockquote>\n");
+}
+
 static int
 rndr_codespan(struct buf *ob, const struct buf *text, void *opaque)
 {
@@ -169,6 +178,19 @@ rndr_codespan(struct buf *ob, const struct buf *text, void *opaque)
 	if (text) escape_html(ob, text->data, text->size);
 	BUFPUTSL(ob, "</code>");
 	return 1;
+}
+
+static int
+rndr_spoilerspan(struct buf *ob, const struct buf *text, void *opaque)
+{
+    if (!text || !text->size)
+        return 0;
+
+    BUFPUTSL(ob, "<span class=\"md-spoiler-text\">");
+    bufput(ob, text->data, text->size);
+    BUFPUTSL(ob, "</span>");
+
+    return 1;
 }
 
 static int
@@ -713,6 +735,7 @@ sdhtml_toc_renderer(struct sd_callbacks *callbacks, struct html_renderopt *optio
 		NULL,
 		NULL,
 		NULL,
+		NULL,
 		toc_header,
 		NULL,
 		NULL,
@@ -724,6 +747,7 @@ sdhtml_toc_renderer(struct sd_callbacks *callbacks, struct html_renderopt *optio
 
 		NULL,
 		rndr_codespan,
+		rndr_spoilerspan,
 		rndr_double_emphasis,
 		rndr_emphasis,
 		NULL,
@@ -753,6 +777,7 @@ sdhtml_renderer(struct sd_callbacks *callbacks, struct html_renderopt *options, 
 	static const struct sd_callbacks cb_default = {
 		rndr_blockcode,
 		rndr_blockquote,
+		rndr_blockspoiler,
 		rndr_raw_block,
 		rndr_header,
 		rndr_hrule,
@@ -765,6 +790,7 @@ sdhtml_renderer(struct sd_callbacks *callbacks, struct html_renderopt *options, 
 
 		rndr_autolink,
 		rndr_codespan,
+		rndr_spoilerspan,
 		rndr_double_emphasis,
 		rndr_emphasis,
 		rndr_image,
