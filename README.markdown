@@ -27,7 +27,7 @@ Building
 - to be able to run bash scripts
 - `gperf`, [a command-line utility](https://www.gnu.org/software/gperf/) - through your package manager
 - `npm`, [node package manager](https://www.npmjs.com/) - through your package manager
-- `emcc`, the Emscripten compiler - [from the Emscripten SDK](https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html) (at least version 1.36.0)
+- `emcc`, the Emscripten compiler - [from the Emscripten SDK](https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html) (or from [source](http://kripken.github.io/emscripten-site/docs/building_from_source/building_emscripten_from_source_using_the_sdk.html)) (at least version 1.36.0)
 
 ### Setup
 
