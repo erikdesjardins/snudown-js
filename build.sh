@@ -51,7 +51,7 @@ sed -r 's/,window\.(\w+)=function/;export function \1/g' ./build/snudown_uglify.
 
 # Generate modules
 mkdir -p "dist"
-echo "module.exports = require('@std/esm')(module, { esm: 'js' })('./snudown_es.js');" > ./dist/snudown.js
+echo "module.exports = require('esm')(module, { mode: 'all' })('./snudown_es.js');" > ./dist/snudown.js
 cp ./build/snudown_exports.js ./dist/snudown_es.js
 
 rm -r "build"
