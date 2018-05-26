@@ -40,31 +40,39 @@ gperf src/html_entities.gperf > build/html_entities.c
 ./llvmwasm/bin/s2wasm ./build/snudown.s --allocate-stack 65536 > ./build/snudown_unstripped.wat
 
 # remove unnecessary exports
-sed -r '/^\s\(export\s"(default_renderer|wiki_renderer|memory|malloc|free)"/p ; /^\s\(export/d' ./build/snudown_unstripped.wat > ./build/snudown.wat
+sed -r '/^\s\(export\s"(default_renderer|wiki_renderer|malloc|free)"/p ; /^\s\(export/d' ./build/snudown_unstripped.wat > ./build/snudown.wat
 
-./llvmwasm/bin/wasm-opt ./build/snudown.wat -o ./build/snudown.wasm -Oz
+./llvmwasm/bin/wasm-opt ./build/snudown.wat -o ./build/snudown_opt.wasm -Oz
 
-./llvmwasm/bin/wasm-opt ./build/snudown.wasm --print > ./build/snudown_opt.wat
+./llvmwasm/bin/wasm-opt ./build/snudown_opt.wasm --print > ./build/snudown_opt.wat
 
-# TODO: investigate this when it doesn't crash
-#./llvmwasm/bin/wasm2asm ./build/snudown_opt.wat -o ./dist/snudown_asm.js
+./llvmwasm/bin/wasm2asm ./build/snudown_opt.wat -o ./build/snudown_asm.js
 
-node -e " \
-var fs = require('fs'); \
-var wasm = fs.readFileSync('./build/snudown.wasm'); \
-var wasmString = String.fromCharCode.apply(null, new Uint8Array(wasm.buffer)); \
-var wrapper = fs.readFileSync('./wrapper.js', 'utf8'); \
-var interpolatedWrapper = wrapper.replace('COMPILED_WASM_PLACEHOLDER', JSON.stringify(wasmString)); \
-fs.writeFileSync('./build/snudown_unopt.js', interpolatedWrapper); \
-"
+# todo upstream this
+sed 's/}; else/} else/ ; s/FUNCTION_TABLE_3/FUNCTION_TABLE_iii/' ./build/snudown_asm.js > ./build/snudown_fixed.js
 
-./node_modules/terser/bin/uglifyjs ./build/snudown_unopt.js -o ./build/snudown_opt.js -m -c --toplevel --comments
+# manually inline asmFunc
+sed '/^function asmFunc(global, env, buffer) {/d ; /^}/d' ./build/snudown_fixed.js > ./build/snudown_flattened.js
+sed 's/return {/var wasm = {/' ./build/snudown_flattened.js > ./build/snudown_returned.js
+
+cat ./header.js ./build/snudown_returned.js ./footer.js > ./build/snudown_wrapped.js
+
+./node_modules/babel-cli/bin/babel.js ./build/snudown_wrapped.js -o ./build/snudown_opt.js \
+--no-babelrc \
+--presets=more-optimization \
+
+./node_modules/terser/bin/uglifyjs ./build/snudown_opt.js -o ./build/snudown_min.js \
+--comments \
+--toplevel \
+-c negate_iife=false,keep_fargs=false,passes=10,pure_getters,unsafe \
+-m \
+-b beautify=false,wrap_iife \
 
 node -e " \
 var fs = require('fs'); \
 var path = require('path'); \
 var package = require('./package.json'); \
-var source = fs.readFileSync('./build/snudown_opt.js'); \
+var source = fs.readFileSync('./build/snudown_min.js'); \
 fs.writeFileSync(package.browser, \
 	source); \
 fs.writeFileSync(package.module, \

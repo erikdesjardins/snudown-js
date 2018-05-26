@@ -3,13 +3,16 @@
   "version": "3.1.3",
   "description": "a WebAssembly port of Snudown",
   "main": "./dist/snudown.js",
-  "module": "./dist/snudown_sync.js",
-  "browser": "./dist/snudown_async.js",
+  "module": "./dist/snudown_node.js",
+  "browser": "./dist/snudown_browser.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/erikdesjardins/snudown-js.git"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-more-optimization": "0.0.5",
     "terser": "3.11.0"
   },
   "license": "MIT",

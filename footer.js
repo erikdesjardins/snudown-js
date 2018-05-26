@@ -1,54 +1,17 @@
-/* @license
- *
- * Copyright (c) 2009, Natacha Porté
- * Copyright (c) 2011, Vicent Marti
- * Copyright (c) 2015, Erik Desjardins
- *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-
-var source = COMPILED_WASM_PLACEHOLDER;
-var bytecode = new Uint8Array(new ArrayBuffer(source.length));
-for (var i = 0; i < source.length; ++i) bytecode[i] = source.charCodeAt(i);
-
-var wasm = new WebAssembly.Instance(
-	new WebAssembly.Module(bytecode),
-	{ env: {
-		_abort: function abort(errno) {
-			throw new Error('abort (error ' + errno + ')');
-		},
-		_grow: function grow() {
-			if (!wasm) return;
-			mem = new Uint8Array(wasm.memory.buffer);
-		}
-	} }
-).exports;
-var mem = new Uint8Array(wasm.memory.buffer);
-
 function allocString(str) {
 	var bytes = new TextEncoder().encode(str);
 	var ptr = wasm.malloc(bytes.length + 1 /* null terminator */);
 	for (var i = 0; i < bytes.length; ++i) {
-		mem[ptr + i] = bytes[i];
+		HEAP8[ptr + i] = bytes[i];
 	}
-	mem[ptr + i] = 0;
+	HEAP8[ptr + i] = 0;
 	return ptr;
 }
 
 function pointerStringify(ptr) {
 	var nullByte = ptr;
-	while (mem[nullByte++]);
-	return new TextDecoder('utf-8').decode(mem.subarray(ptr, nullByte - 1));
+	while (HEAP8[nullByte++]);
+	return new TextDecoder('utf-8').decode(HEAP8.subarray(ptr, nullByte - 1));
 }
 
 function markdown(renderer, text, options) {
@@ -56,7 +19,7 @@ function markdown(renderer, text, options) {
 	var bytes = new TextEncoder().encode(text);
 	var buf = wasm.malloc(bytes.length /* no null terminator */);
 	for (var i = 0; i < bytes.length; ++i) {
-		mem[buf + i] = bytes[i];
+		HEAP8[buf + i] = bytes[i];
 	}
 	var size = bytes.length;
 
