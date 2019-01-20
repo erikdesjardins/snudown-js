@@ -44,7 +44,7 @@ sed -r 's/\(function\(\)\{// ; s/\}\)\(\);//' ./build/snudown_oneline.js > ./bui
 -c negate_iife=false,keep_fargs=false,passes=100,pure_getters,unsafe \
 -m \
 -b beautify=false,wrap_iife \
---define Module=undefined,print=undefined,printErr=undefined,TextDecoder=undefined \
+--define Module=undefined,print=undefined,printErr=undefined \
 
 # Convert window exports to ES exports
 sed -r 's/,window\.(\w+)=function/;export function \1/g' ./build/snudown_uglify.js > ./build/snudown_exports.js
