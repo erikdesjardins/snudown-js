@@ -21,6 +21,7 @@ emcc snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdi
 -s EXPORTED_RUNTIME_METHODS=[] \
 -s NO_EXIT_RUNTIME=1 \
 -s NO_FILESYSTEM=1 \
+-s MALLOC=emmalloc \
 -s ABORTING_MALLOC=0 \
 -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
 -s NODEJS_CATCH_EXIT=0 \
