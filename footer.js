@@ -11,7 +11,7 @@ function markdown(
 		tocIdPrefix, // Added to the `id` of each TOC link, i.e. `#PREFIXtoc_0`.
 	} */
 ) /*: string */ {
-	return _markdown(asm['_default_renderer'], text, options);
+	return _markdown(_default_renderer, text, options);
 }
 
 /**
@@ -27,7 +27,7 @@ function markdownWiki(
 		tocIdPrefix, // Added to the `id` of each TOC link, i.e. `#PREFIXtoc_0`.
 	} */
 ) /*: string */ {
-	return _markdown(asm['_wiki_renderer'], text, options);
+	return _markdown(_wiki_renderer, text, options);
 }
 
 function _stackAllocString(str) {
@@ -55,7 +55,7 @@ function _markdown(renderer, text, options) {
 	var ptr = renderer(str, size, nofollow, target, toc_id_prefix, enable_toc);
 	var string = UTF8ToString(ptr);
 
-	asm['_free'](ptr);
+	_free(ptr);
 
 	stackRestore(stack);
 
