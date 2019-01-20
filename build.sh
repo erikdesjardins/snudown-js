@@ -26,6 +26,7 @@ emcc snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdi
 -s NODEJS_CATCH_EXIT=0 \
 -s ENVIRONMENT=web \
 -s TEXTDECODER=0 \
+-s SUPPORT_ERRNO=0 \
 -s WASM=0 \
 -Wno-tautological-compare \
 -Wno-logical-op-parentheses \
