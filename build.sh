@@ -12,6 +12,8 @@ gperf src/html_entities.gperf > build/html_entities.c
 
 # Build Snudown
 
+# todo https://github.com/kripken/emscripten/pull/7733#event-2063926781
+
 ./llvmwasm/bin/clang snudown.c -o ./build/snudown_unlinked.bc -emit-llvm --target=wasm32 -Oz -c \
 -D NDEBUG \
 -I src \
