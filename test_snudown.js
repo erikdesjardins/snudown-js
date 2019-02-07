@@ -424,46 +424,42 @@ cases[repeat('|', 2) + '\n' + repeat('-|', 2) + '\n|\n'] = '<table><thead>\n<tr>
 cases[repeat('|', 65) + '\n' + repeat('-|', 65) + '\n|\n'] = '<table><thead>\n<tr>\n' + repeat('<th></th>\n', 64) + '</tr>\n</thead><tbody>\n<tr>\n<td colspan="64" ></td>\n</tr>\n</tbody></table>\n';
 cases[repeat('|', 66) + '\n' + repeat('-|', 66) + '\n|\n'] = '<p>' + repeat('|', 66) + '\n' + repeat('-|', 66) + '\n|' + '</p>\n';
 
-function xrange(start, end) {
+function* xrange(start, end) {
     if (end == undefined) {
         end = start;
         start = 0;
     }
-    var out = [];
     for (var i = start; i < end; i++) {
-        out.push(i);
+        yield i;
     }
-    return out;
 }
 
-function chain() {
-    return Array.prototype.reduce.call(arguments, function(acc, arr) { return acc.concat(arr); });
+function* chain(...iterables) {
+    for (var iter of iterables) {
+        yield* iter;
+    }
 }
 
 // Test that every numeric entity is encoded as
 // it should be.
-var ILLEGAL_NUMERIC_ENTS = chain(
+var ILLEGAL_NUMERIC_ENTS = new Set(chain(
     xrange(0, 9),
     xrange(11, 13),
     xrange(14, 32),
     xrange(55296, 57344),
     xrange(65534, 65536)
-);
-
-function _in(arr, ele) {
-    return arr.some(function(v) { return v === ele; })
-}
+));
 
 var ent_test_key = '';
 var ent_test_val = '';
-xrange(65550).forEach(function(i) {
-    ent_testcase = '&#' + i + ';&#x' + i.toString(16) + ';';
+for (const i of xrange(65550)) {
+    var ent_testcase = '&#' + i + ';&#x' + i.toString(16) + ';';
     ent_test_key += ent_testcase;
-    if (_in(ILLEGAL_NUMERIC_ENTS, i))
+    if (ILLEGAL_NUMERIC_ENTS.has(i))
         ent_test_val += ent_testcase.replace(/&/g, '&amp;');
     else
         ent_test_val += ent_testcase;
-});
+}
 
 cases[ent_test_key] = '<p>' + ent_test_val + '</p>\n';
 
