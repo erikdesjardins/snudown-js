@@ -21,10 +21,12 @@ emcc snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdi
 -s MALLOC=emmalloc \
 -s ABORTING_MALLOC=0 \
 -s ENVIRONMENT=web \
+-s INCOMING_MODULE_JS_API=[] \
 -s TEXTDECODER=0 \
 -s SUPPORT_ERRNO=0 \
 -s FAST_UNROLLED_MEMCPY_AND_MEMSET=0 \
 -s WASM=0 \
+-s STRICT=1 \
 -Wno-tautological-compare \
 -Wno-logical-op-parentheses \
 -Wno-almost-asm \
