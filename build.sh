@@ -18,6 +18,8 @@ emcc snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdi
 --memory-init-file 0 \
 -s MEM_INIT_METHOD=2 \
 -s EXPORTED_FUNCTIONS=[\'_default_renderer\',\'_wiki_renderer\'] \
+-s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[] \
+-s LIBRARY_DEPS_TO_AUTOEXPORT=[] \
 -s MALLOC=emmalloc \
 -s ABORTING_MALLOC=0 \
 -s ENVIRONMENT=web \
