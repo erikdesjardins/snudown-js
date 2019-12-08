@@ -22,6 +22,10 @@ jobs:
     - run: docker run --rm -v $(pwd):/src emscripten ./build.sh
     - run: node test_snudown.js
     - run: ls -lh dist
+    - uses: actions/upload-artifact@v1
+      with:
+        name: dist
+        path: dist
     - uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
