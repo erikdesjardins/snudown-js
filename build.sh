@@ -27,6 +27,7 @@ emcc snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdi
 -s TEXTDECODER=0 \
 -s SUPPORT_ERRNO=0 \
 -s FAST_UNROLLED_MEMCPY_AND_MEMSET=0 \
+-s DYNAMIC_EXECUTION=0 \
 -s WASM=0 \
 -s STRICT=1 \
 -Wno-tautological-compare \
