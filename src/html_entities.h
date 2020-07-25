@@ -4,13 +4,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-const uint32_t MAX_NUM_ENTITY_VAL;
+extern const uint32_t MAX_NUM_ENTITY_VAL;
 
-const size_t MAX_NUM_ENTITY_LEN;
+extern const size_t MAX_NUM_ENTITY_LEN;
 
 int is_valid_numeric_entity(uint32_t entity_val);
 
 const char* is_allowed_named_entity (register const char *str, register size_t len);
 
 #endif
-
