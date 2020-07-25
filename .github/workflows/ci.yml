@@ -22,6 +22,7 @@ jobs:
     - run: docker run --rm -v $(pwd):/src emscripten ./build.sh
     - run: node test_snudown.js
     - run: ls -lh dist
+      if: "!cancelled()"
     - uses: actions/upload-artifact@v1
       with:
         name: dist
