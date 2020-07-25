@@ -15,20 +15,19 @@ emcc snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdi
 --pre-js header.js --post-js footer.js \
 -o build/snudown_emscripten.js \
 -Oz --llvm-lto 1 --closure 2 -DNDEBUG \
---memory-init-file 0 \
--s MEM_INIT_METHOD=2 \
 -s EXPORTED_FUNCTIONS=[\'_default_renderer\',\'_wiki_renderer\'] \
 -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[] \
 -s LIBRARY_DEPS_TO_AUTOEXPORT=[] \
 -s MALLOC=emmalloc \
 -s ABORTING_MALLOC=0 \
 -s ENVIRONMENT=web \
--s INCOMING_MODULE_JS_API=[] \
 -s TEXTDECODER=0 \
 -s SUPPORT_ERRNO=0 \
 -s FAST_UNROLLED_MEMCPY_AND_MEMSET=0 \
 -s DYNAMIC_EXECUTION=0 \
 -s WASM=0 \
+-s MINIMAL_RUNTIME=2 \
+-s SINGLE_FILE=1 \
 -s STRICT=1 \
 -Wno-tautological-compare \
 -Wno-logical-op-parentheses \
@@ -47,7 +46,7 @@ sed -r 's/\(function\(\)\{// ; s/\}\)\(\);//' ./build/snudown_oneline.js > ./bui
 -c negate_iife=false,keep_fargs=false,passes=100,pure_getters,unsafe \
 -m \
 -b beautify=false,wrap_iife \
---define Module=undefined,print=undefined,printErr=undefined \
+--define Module=undefined \
 
 # Convert window exports to ES exports
 sed -r 's/,window\.(\w+)=function/;export function \1/g' ./build/snudown_uglify.js > ./build/snudown_exports.js
