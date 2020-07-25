@@ -14,7 +14,7 @@ emcc snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdi
 -I src -I html \
 --pre-js header.js --post-js footer.js \
 -o build/snudown_emscripten.js \
--Oz --llvm-lto 1 --closure 2 -DNDEBUG \
+-Oz -flto=full --closure 2 -DNDEBUG \
 -s EXPORTED_FUNCTIONS=[\'_default_renderer\',\'_wiki_renderer\'] \
 -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[] \
 -s LIBRARY_DEPS_TO_AUTOEXPORT=[] \
