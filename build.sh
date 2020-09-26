@@ -49,6 +49,7 @@ sed -r 's/\(function\(\)\{// ; s/\}\)\(\);//' ./build/snudown_oneline.js > ./bui
 --toplevel \
 -c negate_iife=false,keep_fargs=false,passes=100,pure_getters,unsafe \
 -m \
+--mangle-props reserved=['markdown','markdownWiki','nofollow','target','tocIdPrefix','enableToc'] \
 -b beautify=false,wrap_iife \
 --define Module=undefined \
 
