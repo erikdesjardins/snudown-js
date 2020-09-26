@@ -20,6 +20,10 @@ emcc snudown.c src/autolink.c src/buffer.c src/markdown.c src/stack.c html/houdi
 -s LIBRARY_DEPS_TO_AUTOEXPORT=[] \
 -s MALLOC=emmalloc \
 -s ABORTING_MALLOC=0 \
+-s ALLOW_MEMORY_GROWTH=1 \
+-s TOTAL_STACK=8192 \
+-s INITIAL_MEMORY=65536 \
+-s MAXIMUM_MEMORY=16777216 \
 -s ENVIRONMENT=web \
 -s TEXTDECODER=0 \
 -s SUPPORT_ERRNO=0 \
