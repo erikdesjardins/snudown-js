@@ -528,6 +528,8 @@ var wiki_cases = {
         '<p><table scope="foo"></p>\n',
 };
 
+var start = Date.now();
+
 function runTest(fn, input, expected_output) {
     var output = fn.apply(null, input);
     if (output !== expected_output)
@@ -597,5 +599,5 @@ for (var input in cases) {
     runTest.apply(null, testArgs);
 });
 
-console.log('Test Passed.');
-
+var elapsed = Date.now() - start;
+console.log('Test Passed:', elapsed, 'ms');
