@@ -637,7 +637,7 @@ char_emphasis(struct buf *ob, struct sd_markdown *rndr, uint8_t *data, size_t ma
 	size_t ret;
 
 	if (size > 3 && c == '>' && data[1] == '!') {
-		if(_isspace(data[2]) || (ret = parse_spoilerspan(ob, rndr, data + 2, size - 2)) == 0)
+		if((ret = parse_spoilerspan(ob, rndr, data + 2, size - 2)) == 0)
 			return 0;
 
 		return ret + 2;
